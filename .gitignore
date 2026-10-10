@@ -3,3 +3,5 @@ result
 **/target
 **/node_modules
 /.github_token
+/backend/*.db
+/backend/*.db-*
