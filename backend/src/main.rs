@@ -17,13 +17,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .init();
 
     let config = Config::load()?;
+    let practice = PracticeService::new(QuestionBank::questions());
     let mut options = ConnectOptions::new(config.database_url);
     options.sqlx_logging(false);
     let db = Database::connect(options).await?;
     Migrator::up(&db, None).await?;
 
     // A service mount reserves both "/api" and "/api/" from the static fallback.
-    let practice = PracticeService::new(QuestionBank::default());
     let api = routes::api(practice);
     let app = Router::new()
         .nest_service("/api", api)
