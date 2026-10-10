@@ -1,6 +1,8 @@
-use axum::{Router, http::StatusCode, routing::get};
+use axum::Router;
 use migration::{Migrator, MigratorTrait};
-use oph_trainer_backend::{config::Config, routes};
+use oph_trainer_backend::{
+    config::Config, practice::PracticeService, question_bank::QuestionBank, routes,
+};
 use sea_orm::{ConnectOptions, Database};
 use tokio::net::TcpListener;
 use tower_http::services::ServeDir;
@@ -21,10 +23,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     Migrator::up(&db, None).await?;
 
     // A service mount reserves both "/api" and "/api/" from the static fallback.
-    let api = Router::new()
-        .route("/sample", get(routes::sample))
-        .fallback(|| async { StatusCode::NOT_FOUND })
-        .with_state(db);
+    let practice = PracticeService::new(QuestionBank::default());
+    let api = routes::api(practice);
     let app = Router::new()
         .nest_service("/api", api)
         .fallback_service(ServeDir::new(config.static_dir));

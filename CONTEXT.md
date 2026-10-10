@@ -40,25 +40,29 @@ _Avoid_: Reference answer
 An authored expected response to a question, based on the syllabus.
 _Avoid_: User answer, model explanation
 
+**Grading criteria**
+Authored rules for assessing an answer against the syllabus. They specify accepted short-answer variants or an explanation's required points, optional supporting details, and contradictions.
+_Avoid_: Reference answer, grade
+
+**Contradiction**
+A false claim in an explanation that conflicts with the syllabus and makes the answer incorrect, even when it includes the required points. Rejecting that false claim is not a contradiction.
+_Avoid_: Missing required point, wording difference
+
 **Grade**
 A correct or incorrect assessment of an answer. A user-corrected grade has the same meaning as any other grade.
 _Avoid_: Score, partial credit
 
 **Progress**
-A person's history of correct and incorrect outcomes for syllabus questions, used to describe what they have practiced and what they struggle with.
+An account's history of correct and incorrect outcomes for syllabus questions, used to describe what its learner has practiced and what they struggle with.
 _Avoid_: Answer archive, admission prediction
 
 **Topic**
 A subject area within the syllabus that groups related questions.
 _Avoid_: Quiz
 
-**Guest**
-A person practicing without an account, with progress retained in the same browser.
-_Avoid_: Account holder
-
 **Account**
-A saved practice history that a person can access across devices using an account key.
-_Avoid_: Profile, membership
+A learner's saved practice history, identified by an account key and accessible across devices. Every learner has an account, whether newly created or returning.
+_Avoid_: Guest account, registered account, profile, membership
 
 **Account key**
 A secret that identifies an account and is its sole login credential.

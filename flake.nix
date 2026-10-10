@@ -15,6 +15,8 @@
       in
       {
         devShell = pkgs.mkShell {
+          RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+
           buildInputs = with pkgs; [
             cargo
             rustc

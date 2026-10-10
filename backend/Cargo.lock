@@ -1638,9 +1638,12 @@ version = "0.1.0"
 dependencies = [
  "axum",
  "migration",
+ "rand 0.9.5",
  "sea-orm",
  "serde",
+ "serde_json",
  "tokio",
+ "tower",
  "tower-http",
  "tracing",
  "tracing-subscriber",

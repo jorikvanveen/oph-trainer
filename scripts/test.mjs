@@ -137,6 +137,10 @@ async function serverOrigin(server) {
 try {
   temporary = await mkdtemp(join(tmpdir(), 'oph-trainer-test-'));
   console.log(`Test workspace: ${temporary}`);
+  await run('cargo', ['test', '--locked', '--workspace'], {
+    cwd: join(root, 'backend'),
+    env: { ...process.env, CARGO_TARGET_DIR: target }
+  }, 'Rust tests');
   await run('bash', [join(root, 'scripts', 'build.sh')], {
     env: { ...process.env, CARGO_TARGET_DIR: target }
   }, 'Production build');

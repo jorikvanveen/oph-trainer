@@ -9,7 +9,7 @@ Install frontend dependencies once with `npm ci --prefix frontend` from the repo
 | `dev-backend.sh` | Run the backend with Cargo. Extra arguments go to `cargo run`. |
 | `dev-frontend.sh` | Run the Vite development server. Extra arguments go to Vite. |
 | `check.sh` | Check Rust formatting, run workspace Clippy with warnings denied, and check Svelte/TypeScript. |
-| `test.sh` | Build the production app and run Playwright against Axum with a temporary SQLite database. Extra arguments go to Playwright. |
+| `test.sh` | Run Rust workspace tests, build the production app, and run Playwright against Axum with a temporary SQLite database. Extra arguments go to Playwright. |
 | `export-dtos.sh` | Regenerate TypeScript DTOs in `frontend/src/lib/dto/` using the ts-rs export tests. |
 | `build.sh` | Export DTOs, build the static frontend, and compile the release backend. |
 | `start.sh` | Run the release backend. Run `build.sh` first. |
@@ -44,11 +44,11 @@ Install dependencies with `npm ci --prefix frontend`. Run tests in the flake dev
 
 `npm run test:browser --prefix frontend` invokes the same runner. Do not start Vite or the backend yourself. Direct `playwright test` invocation rejects a missing runner configuration rather than connecting to a developer server.
 
-The runner calls `build.sh`, then starts the release Axum binary serving a copy of the static SvelteKit build. Axum binds `127.0.0.1:0`, so the operating system assigns a free port without a port-selection race. The runner reads the bound address from Axum's startup log and checks that the static frontend responds before starting Playwright. Both the frontend and `/api` use that origin.
+The runner runs the Rust workspace tests and calls `build.sh`, then starts the release Axum binary serving a copy of the static SvelteKit build. Axum binds `127.0.0.1:0`, so the operating system assigns a free port without a port-selection race. The runner reads the bound address from Axum's startup log and checks that the static frontend responds before starting Playwright. Both the frontend and `/api` use that origin.
 
 Each invocation creates a fresh SQLite file under a unique temporary directory. Axum applies its real migrations before listening. The runner overrides `OPH_BIND_ADDRESS`, `OPH_DATABASE_URL`, `OPH_STATIC_DIR`, and logging settings, and does not pass other operator settings or provider credentials to the service. It never reads `.env` files. Playwright gives every test a new browser context, with empty cookies and browser storage. Browser profiles and the copied static files also live under the temporary directory.
 
-The whole command, including the production build, has a 600-second deadline. Set `OPH_TEST_TIMEOUT_SECONDS` to an integer between 1 and 3600 to change it. Startup has a 30-second limit; the browser suite has a 120-second limit and each test has a 30-second limit. The runner stops its child process groups and removes the temporary workspace on success, failure, deadline expiry, SIGINT, and SIGTERM. Playwright receives SIGINT to close its workers and browsers, with up to ten additional seconds for shutdown before forced termination. Forced termination of the runner with SIGKILL cannot run cleanup. The scripts require a POSIX environment with Bash and Node, as provided by the Linux flake devshell.
+The whole command, including the Rust tests and production build, has a 600-second deadline. Set `OPH_TEST_TIMEOUT_SECONDS` to an integer between 1 and 3600 to change it. Startup has a 30-second limit; the browser suite has a 120-second limit and each test has a 30-second limit. The runner stops its child process groups and removes the temporary workspace on success, failure, deadline expiry, SIGINT, and SIGTERM. Playwright receives SIGINT to close its workers and browsers, with up to ten additional seconds for shutdown before forced termination. Forced termination of the runner with SIGKILL cannot run cleanup. The scripts require a POSIX environment with Bash and Node, as provided by the Linux flake devshell.
 
 Traces and screenshots from failures remain in a unique run directory under `frontend/test-results/`, which Git ignores. The SQLite database and browser profiles do not remain there. Build outputs use the normal `backend/target/` and `frontend/build/` locations. Do not run production builds concurrently with this command, since those build locations are shared.
 
@@ -73,6 +73,11 @@ Use Playwright's `page` fixture, accessible roles and labels, and observable HTT
 Keep application API endpoints and SQLite real. When external grading is implemented, stub only its HTTP provider boundary through the service's configurable provider endpoint. Add that stub's lifecycle and test-only endpoint configuration to this runner, without forwarding live credentials. Do not use browser API interception as a replacement for the backend grading path.
 
 The React prototype's layout, CSS classes, copy-minimization rules, and screenshots are not production contracts. Keep those assertions on the `frontend-prototype` branch. Feature issues should add their own behavior tests here as their production contracts become available.
+
+## Guest practice
+
+
+The guest endpoints are `GET /api/catalog`, `POST /api/quizzes`, and `POST /api/answers`. Missing or null `topic_ids` selects general practice. An empty list or unknown topic ID is invalid. Until the reviewed bank is populated, selection returns `503` with `no_questions_available` rather than a fake quiz.
 
 ## Migrations
 

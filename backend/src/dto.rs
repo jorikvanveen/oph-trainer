@@ -1,8 +1,128 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 use ts_rs::TS;
+
+use crate::question_bank::AnswerCriteria;
 
 #[derive(Debug, Deserialize, Serialize, TS)]
 #[ts(export)]
 pub struct SampleDto {
+    pub message: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct TopicDto {
+    pub topic_id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct QuestionMetadataDto {
+    pub question_id: String,
+    pub topic_id: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct QuestionCatalogDto {
+    pub topics: Vec<TopicDto>,
+    pub questions: Vec<QuestionMetadataDto>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct QuestionDto {
+    pub question_id: String,
+    pub topic_id: String,
+    pub prompt: String,
+    pub reference_answer: String,
+    pub source_url: String,
+    pub grading: AnswerCriteria,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct QuizSelectionRequestDto {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional = nullable)]
+    pub topic_ids: Option<Vec<String>>,
+
+    #[serde(default)]
+    pub recent_outcomes: BTreeMap<String, Vec<bool>>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct QuizSelectionResponseDto {
+    pub quiz_id: String,
+    pub questions: Vec<QuestionDto>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct AnswerSubmissionDto {
+    pub question_id: String,
+    pub answer: String,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum FeedbackStatusDto {
+    Correct,
+    Incorrect,
+    NeedsSelfAssessment,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct AnswerFeedbackDto {
+    pub question_id: String,
+    pub status: FeedbackStatusDto,
+    pub reference_answer: String,
+    pub source_url: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[ts(export)]
+pub struct QuestionOutcomeDto {
+    pub question_id: String,
+    pub correct: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[ts(export)]
+pub struct CompletedQuizDto {
+    pub quiz_id: String,
+    pub outcomes: Vec<QuestionOutcomeDto>,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(rename_all = "snake_case")]
+#[ts(export)]
+pub enum ApiErrorCodeDto {
+    NoQuestionsAvailable,
+    InvalidTopics,
+    InvalidHistory,
+    UnknownQuestion,
+    InvalidAnswer,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct ApiErrorDto {
+    pub code: ApiErrorCodeDto,
     pub message: String,
 }
