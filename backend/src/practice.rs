@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{BTreeMap, HashSet};
 
 use rand::{Rng, distr::Distribution, distr::weighted::WeightedIndex};
 
@@ -39,6 +39,7 @@ impl PracticeService {
     pub fn select_quiz(
         &self,
         request: QuizSelectionRequestDto,
+        recent_outcomes: &BTreeMap<String, Vec<bool>>,
         rng: &mut impl Rng,
     ) -> Result<QuizSelectionResponseDto, ApiErrorDto> {
         let topics = request
@@ -65,8 +66,7 @@ impl PracticeService {
 
         let mut pool = Vec::new();
         for question in &self.bank.questions {
-            let outcomes = request
-                .recent_outcomes
+            let outcomes = recent_outcomes
                 .get(&question.question_id)
                 .map(Vec::as_slice);
             if outcomes.is_some_and(|grades| grades.is_empty()) {
@@ -103,6 +103,7 @@ impl PracticeService {
         Ok(QuizSelectionResponseDto {
             quiz_id: format!("{:032x}", rng.random::<u128>()),
             questions,
+            account_key: None,
         })
     }
 

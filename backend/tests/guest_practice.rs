@@ -1,55 +1,19 @@
+mod support;
+
 use std::collections::{BTreeMap, HashSet};
 
 use axum::{
     Router,
     body::{Body, to_bytes},
-    http::{Method, Request, StatusCode},
+    http::{Method, Request, StatusCode, header},
 };
 use oph_trainer_backend::{
-    dto::{QuestionDto, QuizSelectionRequestDto, TopicDto},
-    practice::PracticeService,
-    question_bank::{AnswerCriteria, QuestionBank},
-    routes,
+    dto::QuizSelectionRequestDto, practice::PracticeService, question_bank::QuestionBank,
 };
 use rand::{SeedableRng, rngs::StdRng};
 use serde_json::{Value, json};
+use support::{app, bank};
 use tower::ServiceExt;
-
-fn bank(size: usize) -> QuestionBank {
-    QuestionBank {
-        topics: vec![
-            TopicDto {
-                topic_id: "audio".into(),
-                name: "Audio".into(),
-            },
-            TopicDto {
-                topic_id: "transcodes".into(),
-                name: "Transcodes".into(),
-            },
-        ],
-        questions: (0..size)
-            .map(|index| QuestionDto {
-                question_id: format!("q{index}"),
-                topic_id: if index < 3 { "audio" } else { "transcodes" }.into(),
-                prompt: format!("Question {index}"),
-                reference_answer: "Authored reference".into(),
-                source_url: "https://example.com/syllabus".into(),
-                grading: if index == 1 {
-                    AnswerCriteria::Explanation {
-                        required_points: vec!["Explain why".into()],
-                        optional_points: vec![],
-                        contradictions: vec![],
-                    }
-                } else {
-                    AnswerCriteria::ShortAnswer {
-                        accepted_answers: vec![" Accepted Answer ".into()],
-                        aliases: vec![" ALIAS ".into()],
-                    }
-                },
-            })
-            .collect(),
-    }
-}
 
 fn service(size: usize) -> PracticeService {
     PracticeService::new(bank(size))
@@ -68,13 +32,19 @@ async fn request(app: Router, method: Method, uri: &str, body: &str) -> (StatusC
         .await
         .unwrap();
     let status = response.status();
+    let is_json = response.headers()[header::CONTENT_TYPE] == "application/json";
     let body = to_bytes(response.into_body(), 1024 * 1024).await.unwrap();
-    (status, serde_json::from_slice(&body).unwrap())
+    let body = if is_json {
+        serde_json::from_slice(&body).unwrap()
+    } else {
+        Value::String(String::from_utf8(body.to_vec()).unwrap())
+    };
+    (status, body)
 }
 
 #[tokio::test]
 async fn catalog_topics_drive_selection_with_distinct_questions_and_small_pools() {
-    let app = routes::api(service(12));
+    let app = app(service(12)).await;
     let (status, catalog) = request(app.clone(), Method::GET, "/catalog", "").await;
     assert_eq!(status, StatusCode::OK);
     assert_eq!(catalog["questions"].as_array().unwrap().len(), 12);
@@ -133,17 +103,14 @@ async fn catalog_topics_drive_selection_with_distinct_questions_and_small_pools(
 #[test]
 fn weighting_favors_unanswered_and_missed_questions_without_excluding_correct_answers() {
     let practice = service(3);
-    let request = QuizSelectionRequestDto {
-        topic_ids: None,
-        recent_outcomes: BTreeMap::from([
-            ("q0".into(), vec![true; 5]),
-            ("q1".into(), vec![false; 5]),
-        ]),
-    };
+    let request = QuizSelectionRequestDto { topic_ids: None };
+    let history = BTreeMap::from([("q0".into(), vec![true; 5]), ("q1".into(), vec![false; 5])]);
     let mut counts = [0; 3];
     let mut rng = StdRng::seed_from_u64(42);
     for _ in 0..1000 {
-        let selection = practice.select_quiz(request.clone(), &mut rng).unwrap();
+        let selection = practice
+            .select_quiz(request.clone(), &history, &mut rng)
+            .unwrap();
         let id = &selection.questions[0].question_id;
         counts[id[1..].parse::<usize>().unwrap()] += 1;
     }
@@ -155,27 +122,23 @@ fn weighting_favors_unanswered_and_missed_questions_without_excluding_correct_an
 #[test]
 fn selection_ignores_older_than_five_outcomes_and_unknown_historical_questions() {
     let practice = service(12);
-    let recent = QuizSelectionRequestDto {
-        topic_ids: None,
-        recent_outcomes: BTreeMap::from([
-            ("q0".into(), vec![true, false, true, false, true]),
-            ("q1".into(), vec![false; 5]),
-        ]),
-    };
+    let request = QuizSelectionRequestDto { topic_ids: None };
+    let recent = BTreeMap::from([
+        ("q0".into(), vec![true, false, true, false, true]),
+        ("q1".into(), vec![false; 5]),
+    ]);
     let mut extended = recent.clone();
-    extended.recent_outcomes.insert(
+    extended.insert(
         "q0".into(),
         vec![false, false, true, false, true, false, true],
     );
-    extended
-        .recent_outcomes
-        .insert("removed-question".into(), vec![false; 20]);
+    extended.insert("removed-question".into(), vec![false; 20]);
     for seed in 0..20 {
         let a = practice
-            .select_quiz(recent.clone(), &mut StdRng::seed_from_u64(seed))
+            .select_quiz(request.clone(), &recent, &mut StdRng::seed_from_u64(seed))
             .unwrap();
         let b = practice
-            .select_quiz(extended.clone(), &mut StdRng::seed_from_u64(seed))
+            .select_quiz(request.clone(), &extended, &mut StdRng::seed_from_u64(seed))
             .unwrap();
         assert_eq!(a, b);
     }
@@ -183,7 +146,7 @@ fn selection_ignores_older_than_five_outcomes_and_unknown_historical_questions()
 
 #[tokio::test]
 async fn short_answers_use_authored_variants_and_explanations_require_self_assessment() {
-    let app = routes::api(service(3));
+    let app = app(service(3)).await;
     for (answer, expected) in [
         ("accepted answer", "correct"),
         (" \tAcCePtEd AnSwEr\n", "correct"),
@@ -218,50 +181,61 @@ async fn short_answers_use_authored_variants_and_explanations_require_self_asses
 
 #[tokio::test]
 async fn invalid_requests_return_actionable_errors_instead_of_falling_back_to_general_practice() {
-    let app = routes::api(service(3));
+    let app = app(service(3)).await;
     for (uri, body, expected_status, expected_code) in [
         (
             "/quizzes",
             r#"{"topic_ids":[]}"#,
             StatusCode::BAD_REQUEST,
-            "invalid_topics",
+            Some("invalid_topics"),
         ),
         (
             "/quizzes",
             r#"{"topic_ids":["unknown"]}"#,
             StatusCode::BAD_REQUEST,
-            "invalid_topics",
+            Some("invalid_topics"),
         ),
         (
             "/quizzes",
             r#"{"recent_outcomes":{"q0":[]}}"#,
-            StatusCode::BAD_REQUEST,
-            "invalid_history",
+            StatusCode::UNPROCESSABLE_ENTITY,
+            None,
+        ),
+        ("/quizzes", "{", StatusCode::BAD_REQUEST, None),
+        (
+            "/answers",
+            r#"{"question_id":"q0","answer":null}"#,
+            StatusCode::UNPROCESSABLE_ENTITY,
+            None,
         ),
         (
             "/answers",
             r#"{"question_id":"unknown","answer":"answer"}"#,
             StatusCode::NOT_FOUND,
-            "unknown_question",
+            Some("unknown_question"),
         ),
         (
             "/answers",
             r#"{"question_id":"q0","answer":"  "}"#,
             StatusCode::BAD_REQUEST,
-            "invalid_answer",
+            Some("invalid_answer"),
         ),
     ] {
         let (status, error) = request(app.clone(), Method::POST, uri, body).await;
         assert_eq!(status, expected_status);
-        assert_eq!(error["code"], expected_code);
-        assert!(!error["message"].as_str().unwrap().is_empty());
+        if let Some(expected_code) = expected_code {
+            assert_eq!(error["code"], expected_code);
+            assert!(!error["message"].as_str().unwrap().is_empty());
+        } else {
+            assert!(!error.as_str().unwrap().is_empty());
+        }
     }
 }
 
 #[tokio::test]
 async fn an_unpopulated_bank_returns_an_explicit_unavailable_error() {
     let practice = PracticeService::new(QuestionBank::default());
-    let (status, error) = request(routes::api(practice), Method::POST, "/quizzes", "{}").await;
+    let (status, error) = request(app(practice).await, Method::POST, "/quizzes", "{}").await;
     assert_eq!(status, StatusCode::SERVICE_UNAVAILABLE);
     assert_eq!(error["code"], "no_questions_available");
 }

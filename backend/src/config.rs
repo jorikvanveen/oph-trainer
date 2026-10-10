@@ -7,7 +7,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load() -> Result<Self, env::VarError> {
+    pub fn load() -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
         Ok(Self {
             bind_address: env_or_default("OPH_BIND_ADDRESS", "127.0.0.1:3000")?,
             database_url: env_or_default("OPH_DATABASE_URL", "sqlite://oph-trainer.db?mode=rwc")?,

@@ -24,10 +24,8 @@ fn questions_support_ten_distinct_questions_and_smaller_topic_quizzes() {
     let mut rng = StdRng::seed_from_u64(5);
     let quiz = practice
         .select_quiz(
-            QuizSelectionRequestDto {
-                topic_ids: None,
-                recent_outcomes: BTreeMap::new(),
-            },
+            QuizSelectionRequestDto { topic_ids: None },
+            &BTreeMap::new(),
             &mut rng,
         )
         .unwrap();
@@ -46,8 +44,8 @@ fn questions_support_ten_distinct_questions_and_smaller_topic_quizzes() {
             .select_quiz(
                 QuizSelectionRequestDto {
                     topic_ids: Some(vec![topic.topic_id.clone()]),
-                    recent_outcomes: BTreeMap::new(),
                 },
+                &BTreeMap::new(),
                 &mut rng,
             )
             .unwrap();

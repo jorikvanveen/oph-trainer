@@ -1,7 +1,8 @@
 use axum::Router;
 use migration::{Migrator, MigratorTrait};
 use oph_trainer_backend::{
-    config::Config, practice::PracticeService, question_bank::QuestionBank, routes,
+    accounts::AccountService, config::Config, practice::PracticeService,
+    question_bank::QuestionBank, routes,
 };
 use sea_orm::{ConnectOptions, Database};
 use tokio::net::TcpListener;
@@ -20,11 +21,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let practice = PracticeService::new(QuestionBank::questions());
     let mut options = ConnectOptions::new(config.database_url);
     options.sqlx_logging(false);
+    options.record_stmt_in_spans(false);
     let db = Database::connect(options).await?;
     Migrator::up(&db, None).await?;
 
     // A service mount reserves both "/api" and "/api/" from the static fallback.
-    let api = routes::api(practice);
+    let api = routes::api(practice, AccountService::new(db));
     let app = Router::new()
         .nest_service("/api", api)
         .fallback_service(ServeDir::new(config.static_dir));

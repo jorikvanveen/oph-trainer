@@ -1,5 +1,8 @@
+pub mod accounts;
 pub mod config;
 pub mod dto;
+pub mod entity;
 pub mod practice;
+pub mod progress;
 pub mod question_bank;
 pub mod routes;

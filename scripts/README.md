@@ -14,6 +14,7 @@ Install frontend dependencies once with `npm ci --prefix frontend` from the repo
 | `build.sh` | Export DTOs, build the static frontend, and compile the release backend. |
 | `start.sh` | Run the release backend. Run `build.sh` first. |
 | `migrate.sh` | Run SeaORM migration commands. With no arguments, show migration status. |
+| `generate-entities.sh` | Migrate a temporary SQLite database and regenerate SeaORM entities with the CLI. |
 
 For development, run these in separate terminals:
 
@@ -74,17 +75,29 @@ Keep application API endpoints and SQLite real. When external grading is impleme
 
 The React prototype's layout, CSS classes, copy-minimization rules, and screenshots are not production contracts. Keep those assertions on the `frontend-prototype` branch. Feature issues should add their own behavior tests here as their production contracts become available.
 
-## Guest practice
+## Practice and progress APIs
 
-The guest endpoints are `GET /api/catalog`, `POST /api/quizzes`, and `POST /api/answers`. Missing or null `topic_ids` selects general practice. An empty list or unknown topic ID is invalid. The backend uses a hardcoded Rust question bank: twelve questions across audio formats, MP3, and transcodes. General practice selects ten distinct questions; selecting one topic uses its four questions. An empty pool returns `503` with `no_questions_available`.
+The practice endpoints are `GET /api/catalog`, `POST /api/quizzes`, and `POST /api/answers`. Missing or null `topic_ids` selects general practice. An empty list or unknown topic ID is invalid. Selection uses recent outcomes from the account identified by its key. Client-supplied history is rejected. The backend uses a hardcoded Rust question bank: twelve questions across audio formats, MP3, and transcodes. General practice selects ten distinct questions; selecting one topic uses its four questions. An empty pool returns `503` with `no_questions_available`.
 
 Edit the authored `QuestionDto` entries in [questions.rs](../backend/src/question_bank/questions.rs). Keep existing question IDs for the same questions, assign new IDs to different questions, and review content against the linked official syllabus pages. Author accepted answers and aliases explicitly; explanation criteria require the points the prompt asks for, with optional details and contradictions kept separate. Run `./scripts/test.sh` after edits. Tests check the bank's unique IDs, topic references, nonblank content, official source links, and grading criteria directly; startup performs no content validation.
 
+The [account decision](../docs/adr/0002-account-keys-as-sole-credentials.md) explains account keys. [Backend DTOs](../backend/src/dto.rs) define completed-quiz and progress contracts. Account keys authorize requests through the `Authorization: Bearer` header. Serve production traffic through HTTPS.
+
 ## Migrations
+
+Create migration scaffolds with the CLI, fill their `up` and `down` methods using migration builders, then regenerate entities from the migrated schema:
+
+```sh
+./scripts/migrate.sh generate create_accounts
+./scripts/generate-entities.sh
+```
+
+`generate-entities.sh` creates a fresh SQLite database under a temporary directory, applies all project migrations through `migrate.sh`, and runs `sea-orm-cli generate entity` into `backend/src/entity/`. It ignores `OPH_DATABASE_URL` and removes the temporary database on exit. Generated entities use table names as module names and have no API serialization derives. Keep schema types and relationships in migrations so regeneration reproduces them. Application-specific behavior belongs outside generated entities.
+
+To inspect or apply migrations to the configured application database:
 
 ```sh
 ./scripts/migrate.sh
-./scripts/migrate.sh generate create_accounts
 ./scripts/migrate.sh up
 ```
 

@@ -54,9 +54,6 @@ pub struct QuizSelectionRequestDto {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[ts(optional = nullable)]
     pub topic_ids: Option<Vec<String>>,
-
-    #[serde(default)]
-    pub recent_outcomes: BTreeMap<String, Vec<bool>>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
@@ -65,6 +62,7 @@ pub struct QuizSelectionRequestDto {
 pub struct QuizSelectionResponseDto {
     pub quiz_id: String,
     pub questions: Vec<QuestionDto>,
+    pub account_key: Option<String>,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
@@ -95,6 +93,7 @@ pub struct AnswerFeedbackDto {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
 #[ts(export)]
 pub struct QuestionOutcomeDto {
     pub question_id: String,
@@ -102,10 +101,46 @@ pub struct QuestionOutcomeDto {
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
 #[ts(export)]
 pub struct CompletedQuizDto {
     pub quiz_id: String,
     pub outcomes: Vec<QuestionOutcomeDto>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct CommitQuizDto {
+    pub quiz_id: String,
+    pub question_ids: Vec<String>,
+    pub outcomes: Vec<QuestionOutcomeDto>,
+}
+
+#[derive(Serialize, TS)]
+#[ts(export)]
+pub struct AccountDto {
+    pub account_key: String,
+}
+
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]
+pub struct ProgressMetricsDto {
+    pub available_questions: usize,
+    pub covered_questions: usize,
+    pub coverage_percentage: f64,
+    pub completed_answers: usize,
+    pub correct_answers: usize,
+    pub correct_percentage: Option<f64>,
+}
+
+#[derive(Debug, Clone, Serialize, TS)]
+#[ts(export)]
+pub struct ProgressDto {
+    pub history: Vec<CompletedQuizDto>,
+    pub recent_outcomes: BTreeMap<String, Vec<bool>>,
+    pub overall: ProgressMetricsDto,
+    pub by_topic: BTreeMap<String, ProgressMetricsDto>,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq, Eq, TS)]
@@ -117,6 +152,12 @@ pub enum ApiErrorCodeDto {
     InvalidHistory,
     UnknownQuestion,
     InvalidAnswer,
+    InvalidCompletedQuiz,
+    QuizConflict,
+    InvalidAccountKey,
+    Unauthenticated,
+    DatabaseUnavailable,
+    AccountUnavailable,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
