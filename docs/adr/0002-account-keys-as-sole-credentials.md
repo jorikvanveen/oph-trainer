@@ -1,0 +1,3 @@
+# Account keys as sole credentials
+
+An account key both identifies an account and authorizes access to its progress. Accounts store only practice progress, so conventional usernames, email addresses, separate passwords, and external identity providers add more account-management work than this app needs. Account keys are secrets, not public identifiers. Users can replace a key while authenticated, but losing the key and all authenticated sessions means losing access; there is no recovery service. Creating an account preserves guest progress, while entering an existing account key replaces local progress with that account's saved progress rather than merging histories.
