@@ -7,3 +7,4 @@ result
 /backend/*.db-*
 /frontend/.svelte-kit/
 /frontend/build/
+/frontend/test-results/
