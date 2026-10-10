@@ -8,7 +8,10 @@ use axum::{
     http::{Method, Request, StatusCode, header},
 };
 use oph_trainer_backend::{
-    dto::QuizSelectionRequestDto, practice::PracticeService, question_bank::QuestionBank,
+    accounts::AccountService,
+    dto::{CommitQuizDto, QuestionOutcomeDto, QuizSelectionRequestDto},
+    practice::PracticeService,
+    question_bank::QuestionBank,
 };
 use rand::{SeedableRng, rngs::StdRng};
 use serde_json::{Value, json};
@@ -100,23 +103,90 @@ async fn catalog_topics_drive_selection_with_distinct_questions_and_small_pools(
     assert_ne!(general["quiz_id"], another["quiz_id"]);
 }
 
-#[test]
-fn weighting_favors_unanswered_and_missed_questions_without_excluding_correct_answers() {
+#[tokio::test]
+async fn weighting_favors_unanswered_and_saved_misses_without_excluding_correct_answers() {
     let practice = service(3);
     let request = QuizSelectionRequestDto { topic_ids: None };
-    let history = BTreeMap::from([("q0".into(), vec![true; 5]), ("q1".into(), vec![false; 5])]);
+    let accounts = AccountService::new(support::database("sqlite::memory:").await);
+    let key = accounts.create().await.unwrap().account_key;
+    let other_key = accounts.create().await.unwrap().account_key;
+    for index in 0..7 {
+        for (key, correct) in [(&key, index >= 2), (&other_key, false)] {
+            accounts
+                .commit_quiz(
+                    key,
+                    CommitQuizDto {
+                        quiz_id: format!("quiz-{index}"),
+                        question_ids: vec!["q0".into(), "q1".into()],
+                        outcomes: vec![
+                            QuestionOutcomeDto {
+                                question_id: "q0".into(),
+                                correct,
+                            },
+                            QuestionOutcomeDto {
+                                question_id: "q1".into(),
+                                correct: false,
+                            },
+                        ],
+                    },
+                    &practice.catalog(),
+                )
+                .await
+                .unwrap();
+        }
+    }
+    let history = accounts.recent_outcomes(&key).await.unwrap();
+    let other_history = accounts.recent_outcomes(&other_key).await.unwrap();
     let mut counts = [0; 3];
+    let mut other_count = 0;
     let mut rng = StdRng::seed_from_u64(42);
+    let mut other_rng = StdRng::seed_from_u64(42);
     for _ in 0..1000 {
         let selection = practice
             .select_quiz(request.clone(), &history, &mut rng)
             .unwrap();
         let id = &selection.questions[0].question_id;
         counts[id[1..].parse::<usize>().unwrap()] += 1;
+        let other = practice
+            .select_quiz(request.clone(), &other_history, &mut other_rng)
+            .unwrap();
+        other_count += usize::from(other.questions[0].question_id == "q0");
     }
     assert!(counts[0] > 0);
     assert!(counts[1] > counts[0] * 2);
     assert!(counts[2] > counts[0] * 2);
+    assert!(other_count > counts[0] * 2);
+}
+
+#[tokio::test]
+async fn repeated_and_multiple_topics_select_distinct_questions_from_the_combined_pool() {
+    let app = app(service(12)).await;
+    for (topics, expected_size) in [
+        (json!(["audio", "audio"]), 3),
+        (json!(["audio", "transcodes"]), 10),
+    ] {
+        let (status, quiz) = request(
+            app.clone(),
+            Method::POST,
+            "/quizzes",
+            &json!({"topic_ids": topics}).to_string(),
+        )
+        .await;
+        assert_eq!(status, StatusCode::OK);
+        let questions = quiz["questions"].as_array().unwrap();
+        assert_eq!(questions.len(), expected_size);
+        assert_eq!(
+            questions
+                .iter()
+                .map(|q| &q["question_id"])
+                .collect::<HashSet<_>>()
+                .len(),
+            expected_size
+        );
+        if expected_size == 3 {
+            assert!(questions.iter().all(|q| q["topic_id"] == "audio"));
+        }
+    }
 }
 
 #[test]
@@ -203,8 +273,27 @@ async fn invalid_requests_return_actionable_errors_instead_of_falling_back_to_ge
         ),
         ("/quizzes", "{", StatusCode::BAD_REQUEST, None),
         (
+            "/quizzes",
+            r#"{"topic_ids":"audio"}"#,
+            StatusCode::UNPROCESSABLE_ENTITY,
+            None,
+        ),
+        (
             "/answers",
             r#"{"question_id":"q0","answer":null}"#,
+            StatusCode::UNPROCESSABLE_ENTITY,
+            None,
+        ),
+        (
+            "/answers",
+            r#"{"question_id":"q0"}"#,
+            StatusCode::UNPROCESSABLE_ENTITY,
+            None,
+        ),
+        ("/answers", "{", StatusCode::BAD_REQUEST, None),
+        (
+            "/answers",
+            r#"{"question_id":"q0","answer":"wrong","grading":{"type":"short_answer","accepted_answers":["wrong"],"aliases":[]}}"#,
             StatusCode::UNPROCESSABLE_ENTITY,
             None,
         ),

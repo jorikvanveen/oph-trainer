@@ -82,7 +82,8 @@ impl PracticeService {
                 .as_ref()
                 .is_none_or(|ids| ids.contains(question.topic_id.as_str()))
             {
-                pool.push((question, question_weight(outcomes.unwrap_or_default())));
+                let weight = question_weight(outcomes.unwrap_or_default());
+                pool.push((question, weight));
             }
         }
         if pool.is_empty() {

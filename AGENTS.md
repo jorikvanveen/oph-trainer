@@ -12,6 +12,10 @@ Use the SeaORM CLI wherever it supports the task. Scaffold migrations with `scri
 
 Before changing account persistence or authentication, read `docs/adr/0002-account-keys-as-sole-credentials.md`. Account keys are stored directly as the primary key and sent in `Authorization: Bearer` headers.
 
+# HTTP request handling
+
+Use Axum's standard extractors and built-in rejection responses for request parsing and deserialization. Keep custom API errors for domain validation. Replace extractor rejection handling only when the user explicitly requests it.
+
 # Comments
 
 Use comments only to explain non-obvious details or reasoning, not to restate the code or serve as documentation.

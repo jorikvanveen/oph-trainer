@@ -33,4 +33,33 @@ test('production startup loads the reviewed bank for general and topic practice'
     reference_answer: 'Variable bitrate.',
     source_url: 'https://interview.orpheus.network/mp3.php'
   });
+
+  const rejected = await request.post('/api/answers', {
+    data: { question_id: 'mp3-vbr', answer: 'Variable bit rat' }
+  });
+  expect(rejected.status()).toBe(200);
+  expect(await rejected.json()).toEqual({
+    question_id: 'mp3-vbr',
+    status: 'incorrect',
+    reference_answer: 'Variable bitrate.',
+    source_url: 'https://interview.orpheus.network/mp3.php'
+  });
+
+  const explanation = topic.questions.find((question) => question.grading.type === 'explanation')!;
+  const selfAssessment = await request.post('/api/answers', {
+    data: { question_id: explanation.question_id, answer: 'My explanation' }
+  });
+  expect(selfAssessment.status()).toBe(200);
+  expect(await selfAssessment.json()).toEqual({
+    question_id: explanation.question_id,
+    status: 'needs_self_assessment',
+    reference_answer: explanation.reference_answer,
+    source_url: explanation.source_url
+  });
+
+  const malformed = await request.post('/api/quizzes', {
+    data: { recent_outcomes: { 'mp3-vbr': [false] } }
+  });
+  expect(malformed.status()).toBe(422);
+  expect(await malformed.text()).not.toBe('');
 });
