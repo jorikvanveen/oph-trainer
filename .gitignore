@@ -3,3 +3,7 @@ result
 **/target
 **/node_modules
 /.github_token
+/backend/*.db
+/backend/*.db-*
+/frontend/.svelte-kit/
+/frontend/build/

@@ -21,6 +21,7 @@
             rustfmt
             clippy
             nodejs
+            sea-orm-cli
           ];
         };
       }
