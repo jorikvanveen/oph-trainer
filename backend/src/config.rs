@@ -3,6 +3,7 @@ use std::env;
 pub struct Config {
     pub bind_address: String,
     pub database_url: String,
+    pub static_dir: String,
 }
 
 impl Config {
@@ -10,6 +11,7 @@ impl Config {
         Ok(Self {
             bind_address: env_or_default("OPH_BIND_ADDRESS", "127.0.0.1:3000")?,
             database_url: env_or_default("OPH_DATABASE_URL", "sqlite://oph-trainer.db?mode=rwc")?,
+            static_dir: env_or_default("OPH_STATIC_DIR", "../frontend/build")?,
         })
     }
 }
