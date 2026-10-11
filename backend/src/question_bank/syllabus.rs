@@ -372,7 +372,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
         &["Lossless-to-lossless conversion preserves the audio data and spectrum."], &[],
         &["Lossless conversion removes high-frequency data."],
     ));
-    let classical = explain(
+    let mut classical = explain(
         "spectral-classical",
         "spectral",
         SPECTRALS,
@@ -385,7 +385,67 @@ fn spectral_questions(bank: &mut QuestionBank) {
         &[],
         &["All lossless music must have strong energy across every frequency."],
     );
+    classical.material.push(spectral(
+        "spectrum-b.jpg",
+        "Classical piano spectral diagram from the Orpheus interview guide, with time and frequency axes.",
+    ));
     bank.questions.push(classical);
+    let mut piano_noise = explain(
+        "spectral-piano-noise",
+        "spectral",
+        SPECTRALS,
+        "In this piano recording, most musical energy is at low frequencies, while faint background noise remains above it. Does the sparse musical spectrum establish a lossy transcode? Does noise reaching about 22 kHz prove a lossless source?",
+        "Piano music can naturally have little high-frequency musical energy, so sparsity alone does not establish a lossy transcode. This recording retains faint background noise up to about 22 kHz without a sustained sharp cutoff in the usual MP3 range. That is consistent with a lossless source, though noise alone cannot prove its complete encoding history.",
+        &[
+            "Piano music can naturally have little high-frequency musical energy; sparsity alone does not establish a lossy transcode.",
+            "High-frequency noise is compatible with a lossless recording but cannot prove its source history.",
+        ],
+        &[
+            "The supplied recording retains faint content to about 22 kHz without a sustained sharp cutoff in the usual MP3 range.",
+        ],
+        &["Any noise reaching 22 kHz proves a lossless source."],
+    );
+    piano_noise.material.push(spectral(
+        "spectrum-k.png",
+        "Spectral diagram K of the supplied piano recording, with time and frequency axes.",
+    ));
+    bank.questions.push(piano_noise);
+    let mut piano_range = explain(
+        "spectral-piano-display-range",
+        "spectral",
+        SPECTRALS,
+        "This diagram's colour scale extends down to -130 dBFS. What could happen to faint high-frequency noise if the display floor were raised to -90 dBFS? Would increasing the image resolution alone reveal that noise?",
+        "Noise below the -90 dBFS display floor would appear black, even though it remains in the audio. Increasing image resolution alone cannot reveal levels excluded by the colour scale. A wider displayed range, such as the -130 dBFS floor here, reveals the faint noise without adding any audio content.",
+        &[
+            "Noise below the display floor can appear black even though it remains in the audio.",
+            "Increasing image resolution alone cannot reveal levels excluded by the colour scale; the displayed range must include those levels.",
+        ],
+        &["Changing the displayed range does not add audio content."],
+        &["Changing the colour scale adds high-frequency noise to the audio."],
+    );
+    piano_range.material.push(spectral(
+        "spectrum-k.png",
+        "Spectral diagram K of the supplied piano recording, with time and frequency axes.",
+    ));
+    bank.questions.push(piano_range);
+    let mut piano_transcode = explain(
+        "spectral-piano-transcode",
+        "spectral",
+        SPECTRALS,
+        "This piano excerpt was encoded as MP3 128 kbps and then converted to FLAC. The main upper edge is near 16 kHz. Does converting it to FLAC restore the removed frequencies? Explain how this differs from a piano recording that has weak music but retains high-frequency background noise.",
+        "Converting MP3 to FLAC preserves the already decoded lossy audio; it cannot restore discarded frequencies. This known transcode has a main upper edge near 16 kHz, whereas naturally sparse piano music can retain faint background noise above its main musical energy. Sparse music alone is not the same as a codec cutoff.",
+        &[
+            "Converting MP3 to FLAC cannot restore frequencies discarded by the MP3 encode.",
+            "The known transcode's main upper edge near 16 kHz differs from sparse piano music that retains high-frequency background noise.",
+        ],
+        &[],
+        &["Converting MP3 to FLAC restores the removed frequencies."],
+    );
+    piano_transcode.material.push(spectral(
+        "spectrum-l.png",
+        "Spectral diagram L of the supplied piano excerpt after the stated conversion, with time and frequency axes.",
+    ));
+    bank.questions.push(piano_transcode);
     for (id, file, cutoff, guide_cutoff, encoding, label) in [
         (
             "spectral-320",
@@ -422,7 +482,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
         (
             "spectral-v2",
             "spectrum-g.png",
-            "18.5 kHz",
+            "18.5 to 19 kHz",
             "18.5 kHz",
             "MP3 V2",
             "G",
@@ -436,7 +496,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "H",
         ),
     ] {
-        let observation = format!("Visible energy reaches approximately {cutoff}.");
+        let observation = format!("The main spectral energy reaches approximately {cutoff}.");
         let comparison = format!(
             "Compare the observed upper frequencies of approximately {cutoff} with the supplied {encoding} reference cutoff of {guide_cutoff}."
         );
@@ -445,10 +505,10 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "spectral",
             SPECTRALS,
             &format!(
-                "A reference {encoding} spectrum has a cutoff at {guide_cutoff}. Estimate the highest visible frequencies in this diagram and compare them with the reference cutoff."
+                "A reference {encoding} spectrum has a cutoff at {guide_cutoff}. Estimate the upper edge of the main spectral energy in this diagram and compare it with the reference cutoff."
             ),
             &format!(
-                "Visible energy reaches about {cutoff}, compared with the supplied reference cutoff of {guide_cutoff}. This image was generated from a real {encoding} encode using LAME's defaults; encoder versions and settings can differ."
+                "The main spectral energy reaches about {cutoff}, compared with the supplied reference cutoff of {guide_cutoff}. This image was generated from a real {encoding} encode using LAME's defaults; encoder versions and settings can differ. Faint residual energy above the main edge does not establish a lossless source."
             ),
             &[&observation, &comparison],
             &[],
