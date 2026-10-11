@@ -23,34 +23,22 @@
   }
 </script>
 
-<h1 class="sr-only" tabindex="-1">Practice</h1>
+<div class="practice-intro">
+  <h1 tabindex="-1">Practice for the Orpheus interview</h1>
+  <p>
+    Practice the
+    <a
+      href="https://interview.orpheus.network/"
+      target="_blank"
+      rel="noreferrer"
+    >
+      official syllabus
+    </a>
+    with short quizzes, answer feedback and saved progress.
+  </p>
+</div>
 {#if appState.catalog}
   <section class="topics-section" aria-label="Topics">
-    <div class="practice-toolbar">
-      <div class="quiz-controls">
-        {#if appState.selected.length < appState.catalog.topics.length}<button
-            class="ghost reset-selection"
-            aria-label="Select all topics"
-            title="Select all topics"
-            disabled={appState.busy}
-            onclick={() => {
-              appState.selected = appState.catalog!.topics.map(
-                (topic) => topic.topic_id
-              );
-            }}
-          >
-            <RotateCcw size={14} focusable="false" />
-          </button>{/if}
-        <span class="quiz-size">{Math.min(10, available)} questions</span>
-        <button
-          disabled={appState.busy || appState.selected.length === 0}
-          onclick={startQuiz}
-        >
-          {appState.busy ? 'Starting...' : 'Start quiz'}
-          <ArrowRight size={16} focusable="false" />
-        </button>
-      </div>
-    </div>
     <div class="topic-grid">
       {#each appState.catalog.topics as topic}
         {@const metrics = appState.progress?.by_topic[topic.topic_id]}
@@ -82,6 +70,31 @@
           {/if}
         </label>
       {/each}
+    </div>
+    <div class="practice-toolbar">
+      <div class="quiz-controls">
+        {#if appState.selected.length < appState.catalog.topics.length}<button
+            class="ghost reset-selection"
+            aria-label="Select all topics"
+            title="Select all topics"
+            disabled={appState.busy}
+            onclick={() => {
+              appState.selected = appState.catalog!.topics.map(
+                (topic) => topic.topic_id
+              );
+            }}
+          >
+            <RotateCcw size={14} focusable="false" />
+          </button>{/if}
+        <span class="quiz-size">{Math.min(10, available)} questions</span>
+        <button
+          disabled={appState.busy || appState.selected.length === 0}
+          onclick={startQuiz}
+        >
+          {appState.busy ? 'Starting...' : 'Start quiz'}
+          <ArrowRight size={16} focusable="false" />
+        </button>
+      </div>
     </div>
   </section>
 {/if}
@@ -121,16 +134,29 @@
     background: #edf1e9;
   }
 
-  .sr-only {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    padding: 0;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-    border: 0;
+  .practice-intro {
+    margin-bottom: 32px;
+  }
+
+  .practice-intro h1 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.4px;
+  }
+
+  .practice-intro h1:focus-visible {
+    outline: none;
+  }
+
+  .practice-intro p {
+    margin: 0;
+    font-size: 12px;
+    color: #6c716a;
+  }
+
+  .practice-intro a {
+    color: #4d6c3c;
   }
 
   .practice-toolbar {

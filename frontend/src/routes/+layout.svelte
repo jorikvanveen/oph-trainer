@@ -17,6 +17,15 @@
   let enteredKey = $state('');
   let pendingNavigation = $state<BeforeNavigate | null>(null);
   const quizPage = $derived(page.url.pathname.startsWith('/quiz/'));
+  const title = $derived(
+    page.url.pathname === '/progress/'
+      ? 'Your progress | Orpheus interview trainer'
+      : page.url.pathname === '/quiz/summary/'
+        ? 'Quiz complete | Orpheus interview trainer'
+        : quizPage
+          ? 'Practice quiz | Orpheus interview trainer'
+          : 'Unofficial Orpheus interview trainer'
+  );
 
   onMount(() => {
     void appState.initialize();
@@ -70,11 +79,15 @@
 </script>
 
 <svelte:head>
-  <title>Unofficial Orpheus interview trainer</title>
-  <meta
-    name="description"
-    content="Unofficial training app for the Orpheus admission interview. Not affiliated with Orpheus."
-  />
+  <title>{title}</title>
+  {#if page.url.pathname === '/'}
+    <meta
+      name="description"
+      content="Prepare for the Orpheus admission interview with syllabus-based quizzes, answer feedback and saved progress. Unofficial and not affiliated with Orpheus."
+    />
+  {:else}
+    <meta name="robots" content="noindex" />
+  {/if}
 </svelte:head>
 <svelte:window
   onpagehide={() => {
