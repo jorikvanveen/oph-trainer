@@ -376,8 +376,8 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-classical",
         "spectral",
         SPECTRALS,
-        "A classical piano recording has a sparse spectrum with little high-frequency musical energy, but faint noise extends to about 22 kHz. Why can a lossless recording look like this? Does sparsity alone establish that it is a lossy transcode, and what does the faint noise tell you?",
-        "Piano music can naturally contain little high-frequency musical energy, so sparsity alone does not establish a lossy transcode. The faint noise shows that high-frequency content is still present up to about 22 kHz, even where musical energy is weak. That is consistent with a lossless recording, though it does not prove its source history.",
+        "Why can this sparse piano spectrum still represent lossless audio? What reaches about 22 kHz?",
+        "Piano music can naturally contain little high-frequency musical energy. Faint background noise still reaches about 22 kHz, so the sparse musical spectrum is consistent with lossless audio.",
         &[
             "Piano music can naturally contain little high-frequency musical energy.",
             "Sparsity alone does not establish a lossy transcode; faint noise reaching about 22 kHz shows that high-frequency content is still present.",
@@ -394,50 +394,27 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-piano-noise",
         "spectral",
         SPECTRALS,
-        "In this piano recording, most musical energy is at low frequencies, while faint background noise remains above it. Does the sparse musical spectrum establish a lossy transcode? Does noise reaching about 22 kHz prove a lossless source?",
-        "Piano music can naturally have little high-frequency musical energy, so sparsity alone does not establish a lossy transcode. This recording retains faint background noise up to about 22 kHz without a sustained sharp cutoff in the usual MP3 range. That is consistent with a lossless source, though noise alone cannot prove its complete encoding history.",
+        "How high does the faint background noise extend, in kHz? Why can this sparse piano spectrum still be consistent with lossless audio?",
+        "The faint background noise extends to about 22 kHz. Piano music can naturally have little high-frequency musical energy, so sparsity alone does not indicate a lossy transcode.",
         &[
             "Piano music can naturally have little high-frequency musical energy; sparsity alone does not establish a lossy transcode.",
-            "High-frequency noise is compatible with a lossless recording but cannot prove its source history.",
+            "The faint background noise extends to about 22 kHz.",
         ],
-        &[
-            "The supplied recording retains faint content to about 22 kHz without a sustained sharp cutoff in the usual MP3 range.",
-        ],
-        &["Any noise reaching 22 kHz proves a lossless source."],
+        &[],
+        &["A sparse musical spectrum alone establishes a lossy transcode."],
     );
     piano_noise.material.push(spectral(
         "spectrum-k.png",
         "Spectral diagram K of the supplied piano recording, with time and frequency axes.",
     ));
     bank.questions.push(piano_noise);
-    let mut piano_range = explain(
-        "spectral-piano-display-range",
-        "spectral",
-        SPECTRALS,
-        "This diagram's colour scale extends down to -130 dBFS. What could happen to faint high-frequency noise if the display floor were raised to -90 dBFS? Would increasing the image resolution alone reveal that noise?",
-        "Noise below the -90 dBFS display floor would appear black, even though it remains in the audio. Increasing image resolution alone cannot reveal levels excluded by the colour scale. A wider displayed range, such as the -130 dBFS floor here, reveals the faint noise without adding any audio content.",
-        &[
-            "Noise below the display floor can appear black even though it remains in the audio.",
-            "Increasing image resolution alone cannot reveal levels excluded by the colour scale; the displayed range must include those levels.",
-        ],
-        &["Changing the displayed range does not add audio content."],
-        &["Changing the colour scale adds high-frequency noise to the audio."],
-    );
-    piano_range.material.push(spectral(
-        "spectrum-k.png",
-        "Spectral diagram K of the supplied piano recording, with time and frequency axes.",
-    ));
-    bank.questions.push(piano_range);
     let mut piano_transcode = explain(
         "spectral-piano-transcode",
         "spectral",
         SPECTRALS,
-        "This piano excerpt was encoded as MP3 128 kbps and then converted to FLAC. The main upper edge is near 16 kHz. Does converting it to FLAC restore the removed frequencies? Explain how this differs from a piano recording that has weak music but retains high-frequency background noise.",
-        "Converting MP3 to FLAC preserves the already decoded lossy audio; it cannot restore discarded frequencies. This known transcode has a main upper edge near 16 kHz, whereas naturally sparse piano music can retain faint background noise above its main musical energy. Sparse music alone is not the same as a codec cutoff.",
-        &[
-            "Converting MP3 to FLAC cannot restore frequencies discarded by the MP3 encode.",
-            "The known transcode's main upper edge near 16 kHz differs from sparse piano music that retains high-frequency background noise.",
-        ],
+        "This piano excerpt was converted from MP3 128 kbps to FLAC. Does that restore frequencies removed above the cutoff near 16 kHz? Explain why.",
+        "No. MP3 encoding discarded those frequencies. Converting to FLAC cannot recover the discarded audio data.",
+        &["Converting MP3 to FLAC cannot restore frequencies discarded by the MP3 encode."],
         &[],
         &["Converting MP3 to FLAC restores the removed frequencies."],
     );
@@ -508,12 +485,10 @@ fn spectral_questions(bank: &mut QuestionBank) {
             &format!(
                 "Estimate the top edge of the purple band in kHz. Is it below, near, or above the {guide_cutoff} {encoding} reference cutoff?"
             ),
-            &format!(
-                "The prominent purple/red content ends around {cutoff}. {comparison} This image was generated from a real {encoding} encode using LAME's defaults; encoder versions and settings can differ. Faint residual energy above this boundary does not establish a lossless source."
-            ),
+            &format!("The prominent purple/red content ends around {cutoff}. {comparison}"),
             &[&observation, comparison],
             &[],
-            &["A cutoff uniquely proves the exact MP3 bitrate or preset."],
+            &[],
         );
         question.material.push(spectral(
             file,
@@ -525,45 +500,37 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-v0",
         "spectral",
         SPECTRALS,
-        "This diagram has prominent purple/red content and weaker purple streaks above it. Roughly how high do those weaker streaks reach, in kHz? Do they stop at or extend above the Orpheus guide's 19.5 kHz cutoff for MP3 V0? An estimate to the nearest 1 kHz is enough.",
-        "The weaker purple streaks reach about 21 to 22 kHz, above the guide's 19.5 kHz reference. Most of the prominent content is below about 19 to 20 kHz. This image was generated from a real MP3 V0 encode using LAME's defaults; encoder versions and settings can differ. Content above the guide's reference cutoff does not establish a lossless source.",
+        "How high do the faint purple streaks extend, in kHz? Are they below, near, or above the guide's 19.5 kHz MP3 V0 reference cutoff?",
+        "The faint purple streaks reach about 21 to 22 kHz, above the guide's 19.5 kHz reference. Most of the prominent content is below about 19 to 20 kHz.",
         &[
             "The weaker purple streaks reach approximately 21 to 22 kHz, including equivalent values in Hz.",
             "The weaker streaks extend above the 19.5 kHz reference cutoff.",
         ],
         &["Most of the prominent purple/red content is below about 19 to 20 kHz."],
-        &["A cutoff uniquely proves the exact MP3 bitrate or preset."],
+        &[],
     );
     v0.material.push(spectral(
         "spectrum-e.png",
         "Spectral diagram E with time and frequency axes.",
     ));
     bank.questions.push(v0);
-    bank.questions.extend([
-        explain(
-            "spectral-cutoff-limits", "spectral", SPECTRALS,
-            "Can a spectral cutoff alone identify an exact MP3 bitrate or preset? Explain why.",
-            "No. Encoder versions and settings can produce different cutoffs, so a cutoff alone cannot identify the exact bitrate or preset.",
-            &["A cutoff alone cannot identify the exact bitrate or preset because encoder versions and settings can differ."], &[],
-            &["A cutoff uniquely proves the exact MP3 bitrate or preset."],
-        ),
-        explain(
-            "spectral-mp3-shelf", "spectral", SPECTRALS,
-            "How does an MP3 spectral shelf differ from its final frequency cutoff?",
-            "A shelf, commonly near 16 kHz, is a drop in spectral energy with some content remaining above it. The final cutoff marks the end of visible frequency content.",
-            &["A shelf is a drop in spectral energy with content remaining above it; the final cutoff marks the end of visible frequency content."],
-            &["MP3s commonly show a shelf near 16 kHz."], &[],
-        ),
-    ]);
+    bank.questions.push(explain(
+        "spectral-mp3-shelf",
+        "spectral",
+        SPECTRALS,
+        "At approximately what frequency do MP3 spectrums commonly show a shelf?",
+        "About 16 kHz.",
+        &["MP3s commonly show a shelf near 16 kHz."],
+        &[],
+        &[],
+    ));
     let mut transcode = explain(
         "spectral-disguised-flac",
         "spectral",
         SPECTRALS,
         "This file is encoded as FLAC. What can you infer about its source from the spectrum? Explain your reasoning.",
-        "The cutoff near 18.5 to 19 kHz suggests a possible lossy source, but a cutoff alone cannot prove the source history or exact bitrate. This example was made by converting MP3 192 CBR to FLAC.",
-        &[
-            "The cutoff near 18.5 to 19 kHz suggests a possible lossy source; it does not prove source history.",
-        ],
+        "The cutoff near 18.5 to 19 kHz suggests a lossy source despite the FLAC format. It is close to the guide's 19 kHz MP3 192 kbps CBR reference. This example was made by converting MP3 192 kbps CBR to FLAC.",
+        &["The cutoff near 18.5 to 19 kHz suggests a lossy source despite the FLAC format."],
         &[],
         &["A FLAC extension or large file size proves a lossless source."],
     );

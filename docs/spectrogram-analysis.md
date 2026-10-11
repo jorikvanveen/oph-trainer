@@ -124,7 +124,7 @@ All levels are dBFS per FFT bin with the stated normalization. The source excerp
 
 There is no clear spectral evidence of a lossy transcode in this file. It is suitable as a lossless-looking training example on that basis. This is a spectral assessment, not a sample comparison with an original master, so it cannot certify every step in the recording's history.
 
-The trainer now uses the Blues excerpt in [diagram K](../frontend/static/exercises/spectrum-k.png) and a deliberately generated MP3 128 kbps to FLAC conversion of that excerpt in [diagram L](../frontend/static/exercises/spectrum-l.png). The three piano exercises cover sparse musical energy with faint noise reaching about 22 kHz, the effect of changing the display floor, and why conversion to FLAC cannot restore discarded frequencies. The regenerated diagram L has a main upper edge near 16 kHz. Its 128 kbps conversion is separate from the 192 kbps numerical control plotted above.
+The trainer now uses the Blues excerpt in [diagram K](../frontend/static/exercises/spectrum-k.png) and a deliberately generated MP3 128 kbps to FLAC conversion of that excerpt in [diagram L](../frontend/static/exercises/spectrum-l.png). The two piano exercises cover sparse musical energy with faint noise reaching about 22 kHz and why conversion to FLAC cannot restore discarded frequencies. The display-floor exercise was removed because that knowledge is outside the interview guide. The regenerated diagram L has a main upper edge near 16 kHz. Its 128 kbps conversion is separate from the 192 kbps numerical control plotted above. See the [question audit](spectrogram-question-audit.md) for the guide basis of each remaining spectral question.
 
 ## Regeneration
 
