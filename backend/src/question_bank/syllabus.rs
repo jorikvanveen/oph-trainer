@@ -60,7 +60,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: SOURCES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Tape stores changes in magnetization; vinyl stores physical grooves.".into()],
+                    required_points: vec![
+                        "Tape stores changes in magnetization.".into(),
+                        "Vinyl stores physical grooves.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Vinyl already stores computer-readable digital files.".into()],
                 },
@@ -225,7 +228,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: MP3.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["V0 targets about 245 kbps and V2 about 190 kbps.".into()],
+                    required_points: vec![
+                        "V0 targets about 245 kbps.".into(),
+                        "V2 targets about 190 kbps.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Every V0 encode has exactly 245 kbps average bitrate.".into()],
                 },
@@ -251,7 +257,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: MP3.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["ABR varies bitrate while targeting a preset average.".into(), "CBR holds bitrate constant; VBR targets quality.".into(), "ABR's compromise performs neither approach well.".into()],
+                    required_points: vec![
+                        "ABR varies bitrate while targeting a preset average.".into(),
+                        "CBR holds bitrate constant.".into(),
+                        "VBR targets quality.".into(),
+                        "ABR's compromise performs neither approach well.".into(),
+                    ],
                     optional_points: vec!["ABR's target average makes file size predictable.".into()],
                     contradictions: vec!["ABR and VBR both guarantee the selected average bitrate.".into()],
                 },
@@ -302,7 +313,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["A torrent file describes data and a client connects peers sharing it.".into(), "Leeching downloads; seeding offers data to peers.".into()],
+                    required_points: vec![
+                        "A torrent file describes the data to be shared.".into(),
+                        "A client connects peers sharing the data.".into(),
+                        "Leeching downloads data.".into(),
+                        "Seeding offers data to peers.".into(),
+                    ],
                     optional_points: vec!["A peer can upload completed pieces while downloading other pieces.".into()],
                     contradictions: vec!["Seeding cannot begin until every piece is downloaded.".into()],
                 },
@@ -367,7 +383,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Freeleech excludes download but counts upload.".into(), "Neutral leech excludes both upload and download.".into()],
+                    required_points: vec![
+                        "Freeleech excludes download from recorded statistics.".into(),
+                        "Freeleech counts upload in recorded statistics.".into(),
+                        "Neutral leech excludes upload from recorded statistics.".into(),
+                        "Neutral leech excludes download from recorded statistics.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Neutral leech counts upload toward ratio.".into()],
                 },
@@ -457,7 +478,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: CD.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Ripping extracts music; burning writes music files to a CD.".into()],
+                    required_points: vec![
+                        "Ripping extracts music from a CD.".into(),
+                        "Burning writes music files to a CD.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Burning a lossy file restores the original recording.".into()],
                 },
@@ -533,7 +557,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Catalog or packaging differences alone do not establish a distinct edition.".into(), "A distinct edition requires significantly and meaningfully different audio content.".into(), "Identify concrete evidence to compare: tracklist or running order, and at least one ripping-log detail such as TOC, peak levels or pre-gaps. Stating only that the audio must differ does not cover this evidence requirement.".into()],
+                    required_points: vec![
+                        "Catalog or packaging differences alone do not establish a distinct edition.".into(),
+                        "A distinct edition requires significantly and meaningfully different audio content.".into(),
+                        "Identify tracklist or running order as concrete evidence to compare. Stating only that the audio must differ does not cover this evidence requirement.".into(),
+                        "Identify at least one ripping-log detail such as TOC, peak levels or pre-gaps as concrete evidence to compare. Stating only that the audio must differ does not cover this evidence requirement.".into(),
+                    ],
                     optional_points: vec!["Bonus tracks may establish different audio content.".into()],
                     contradictions: vec!["Every different pressing is allowed to coexist.".into()],
                 },
@@ -572,7 +601,11 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Higher CBR trumps lower CBR; higher ABR trumps lower ABR.".into(), "MP3 320 CBR and V0 trump CBR below 320.".into()],
+                    required_points: vec![
+                        "Higher CBR trumps lower CBR.".into(),
+                        "Higher ABR trumps lower ABR.".into(),
+                        "MP3 320 CBR and V0 trump CBR below 320.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["V0 always trumps 320 CBR.".into()],
                 },
@@ -598,7 +631,11 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["V2 replaces APS.".into(), "V0 replaces APX and V1.".into()],
+                    required_points: vec![
+                        "V2 replaces APS.".into(),
+                        "V0 replaces APX.".into(),
+                        "V0 replaces V1.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["APS and APX can never be trumped.".into()],
                 },
@@ -702,7 +739,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Use an album-named folder even for a single track.".into(), "No archives or unnecessary nesting; filenames reflect track titles.".into(), "Do not put repeated track numbers from multiple discs in one directory.".into()],
+                    required_points: vec![
+                        "Use an album-named folder even for a single track.".into(),
+                        "Do not put music files in archives.".into(),
+                        "Avoid unnecessary folder nesting.".into(),
+                        "Filenames must reflect track titles.".into(),
+                        "Do not put repeated track numbers from multiple discs in one directory.".into(),
+                    ],
                     optional_points: vec!["Year and format in the folder name are encouraged.".into()],
                     contradictions: vec!["A ZIP archive is an acceptable music folder.".into()],
                 },
@@ -718,7 +761,10 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram A with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Horizontal is time; vertical is frequency in Hz/kHz.".into()],
+                    required_points: vec![
+                        "The horizontal axis shows time.".into(),
+                        "The vertical axis shows frequency in Hz/kHz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1048,7 +1094,12 @@ pub(super) fn bank() -> QuestionBank {
                     text: "Read mode               : Secure\nMake use of C2 pointers : No\n\nTrack  1\n     Track quality 100.0 %\n     Test CRC 02B2C5A6\n     Copy CRC 02B2C5A6".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Read mode is Secure and C2 pointers are disabled.".into(), "Test and copy CRCs match.".into(), "The excerpt does not supply a whole-log checker score.".into()],
+                    required_points: vec![
+                        "Read mode is Secure.".into(),
+                        "C2 pointers are disabled.".into(),
+                        "Test and copy CRCs match.".into(),
+                        "The excerpt does not supply a whole-log checker score.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Track quality 100.0% guarantees a 100% whole-log checker score.".into()],
                 },
@@ -1064,7 +1115,11 @@ pub(super) fn bank() -> QuestionBank {
                     text: "  TRACK 01 AUDIO\n    PREGAP 00:00:32\n    INDEX 01 00:00:00".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The excerpt describes AUDIO track 01.".into(), "PREGAP is 00:00:32 and INDEX 01 is 00:00:00.".into()],
+                    required_points: vec![
+                        "The excerpt describes AUDIO track 01.".into(),
+                        "PREGAP is 00:00:32.".into(),
+                        "INDEX 01 is 00:00:00.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1141,7 +1196,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["No trading, selling or public offers, except designated recruiters in approved locations.".into(), "No invite/account requests or unsolicited messages.".into(), "Messaging in response to an Invites Forum offer is permitted.".into()],
+                    required_points: vec![
+                        "Do not trade invites.".into(),
+                        "Do not sell invites.".into(),
+                        "Do not publicly offer invites, except as a designated recruiter in approved locations.".into(),
+                        "Do not request invites or accounts.".into(),
+                        "Do not send unsolicited invite requests.".into(),
+                        "Messaging in response to an Invites Forum offer is permitted.".into(),
+                    ],
                     optional_points: vec!["The Invites Forum is restricted to Elite and above.".into()],
                     contradictions: vec!["Private unsolicited requests are allowed.".into()],
                 },
@@ -1223,7 +1285,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Do not disclose unvolunteered private information without permission or use it for threats or blackmail.".into(), "Do not harvest identifying data with scripts or exploits.".into(), "Privacy protection also covers information found by investigating public details.".into()],
+                    required_points: vec![
+                        "Do not disclose unvolunteered private information without permission.".into(),
+                        "Do not use private information for threats or blackmail.".into(),
+                        "Do not harvest identifying data with scripts or exploits.".into(),
+                        "Privacy protection also covers information found by investigating public details.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Information found through a search may always be published.".into()],
                 },
@@ -1275,7 +1342,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Challenge a decision privately with the deciding moderator, or Staff PM if unavailable; seek rule clarification via Staff PM.".into(), "Do not shop around moderators for a favorable answer; an administrator may give a second opinion.".into()],
+                    required_points: vec![
+                        "Challenge a decision privately with the deciding moderator, or Staff PM if unavailable.".into(),
+                        "Seek rule clarification via Staff PM.".into(),
+                        "Do not shop around moderators for a favorable answer.".into(),
+                        "An administrator may give a second opinion.".into(),
+                    ],
                     optional_points: vec!["Respect staff and their final rule interpretation.".into()],
                     contradictions: vec!["User consensus overrides staff's interpretation.".into()],
                 },
@@ -1353,7 +1425,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Do not seek or exploit live bugs.".into(), "Report critical bugs through responsible disclosure and noncritical bugs in the Bugs Forum.".into(), "Do not publish, share or facilitate exploits.".into()],
+                    required_points: vec![
+                        "Do not seek or exploit live bugs.".into(),
+                        "Report critical bugs through responsible disclosure.".into(),
+                        "Report noncritical bugs in the Bugs Forum.".into(),
+                        "Do not publish, share or facilitate exploits.".into(),
+                    ],
                     optional_points: vec!["Staff decide exploit classifications.".into()],
                     contradictions: vec!["Testing a live vulnerability is allowed before reporting it.".into()],
                 },
