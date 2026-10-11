@@ -85,9 +85,10 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Playback is captured through an analog-to-digital recording device.".into(),
+                    ],
+                    optional_points: vec![
                         "Vinyl playback uses a preamp.".into(),
                     ],
-                    optional_points: vec![],
                     contradictions: vec![],
                 },
             },
@@ -119,9 +120,11 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Digital media already store computer-readable data.".into(),
-                        "Give two of CD, DVD, SACD or WEB download.".into(),
+                        "Two valid examples of digital music sources are given.".into(),
                     ],
-                    optional_points: vec![],
+                    optional_points: vec![
+                        "The guide's examples are CD, DVD, SACD and WEB downloads.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -199,16 +202,20 @@ pub(super) fn bank() -> QuestionBank {
                 question_id: "formats-size".into(),
                 topic_id: "formats".into(),
                 prompt: "For the same recording, why do uncompressed lossless, compressed lossless and lossy files use different amounts of space?".into(),
-                reference_answer: "Uncompressed lossless gives silence the same bits per second as sound. Compressed lossless encodes the audio more compactly, using very few bits for silence. Lossy encoding saves space by discarding some original audio data.".into(),
+                reference_answer: "Uncompressed lossless stores all the recorded audio data without compression, such as raw PCM samples. Compressed lossless represents the same data more compactly without losing information. Lossy encoding saves space by discarding some original audio data.".into(),
                 source_url: FORMATS.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Uncompressed lossless uses the same bits per second for silence and sound.".into(),
-                        "Compressed lossless represents the same audio more compactly, such as using very few bits for silence.".into(),
+                        "Uncompressed lossless stores the recorded audio data without compression.".into(),
+                        "Compressed lossless represents the same audio data more compactly without discarding information.".into(),
                         "Lossy encoding saves space by discarding part of the recorded data.".into(),
                     ],
-                    optional_points: vec!["Lossy removal often affects higher frequencies.".into()],
+                    optional_points: vec![
+                        "Uncompressed audio can be stored as raw PCM samples.".into(),
+                        "Uncompressed PCM uses the same bits per second for silence and sound, while lossless compression can represent silence with very few bits.".into(),
+                        "Lossy removal often affects higher frequencies.".into(),
+                    ],
                     contradictions: vec![
                         "Smaller always means worse quality, including lossless compression.".into(),
                     ],
@@ -451,9 +458,11 @@ pub(super) fn bank() -> QuestionBank {
                     required_points: vec![
                         "Ratio watch gives two weeks to recover before downloads are disabled.".into(),
                         "Over 10 GB downloaded on watch disables downloads immediately.".into(),
-                        "Recover by seeding, filling requests or uploading rule-compliant new torrents.".into(),
+                        "Recover downloading privileges by bringing the ratio back to the required level through a rule-compliant method.".into(),
                     ],
-                    optional_points: vec![],
+                    optional_points: vec![
+                        "Recovery methods include continued seeding, filling requests and uploading allowed new torrents; any one valid method is sufficient.".into(),
+                    ],
                     contradictions: vec![
                         "Duplicates or bad transcodes are acceptable to repair ratio.".into(),
                     ],
@@ -486,9 +495,11 @@ pub(super) fn bank() -> QuestionBank {
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Port forwarding routes incoming peer connections through NAT to the computer running the client, increasing opportunities to upload.".into(),
+                        "Port forwarding lets outside peers connect through NAT to the computer running the client.".into(),
                     ],
-                    optional_points: vec![],
+                    optional_points: vec![
+                        "Better connectability increases opportunities to upload.".into(),
+                    ],
                     contradictions: vec![
                         "Port forwarding guarantees upload credit without data transfer.".into(),
                     ],
@@ -661,18 +672,17 @@ pub(super) fn bank() -> QuestionBank {
                 question_id: "dupes-editions".into(),
                 topic_id: "dupes".into(),
                 prompt: "Do a different catalog number and packaging alone make a distinct edition? What evidence matters?".into(),
-                reference_answer: "No. Different catalog numbers or packaging alone do not establish a distinct edition. The audio content must differ significantly and meaningfully, for example through bonus tracks. Compare tracklists and running order, along with ripping-log details such as the table of contents (TOC), peak levels and pre-gaps, for evidence of those differences.".into(),
+                reference_answer: "No. Different catalog numbers or packaging alone do not establish a distinct edition. The audio content must differ significantly and meaningfully. Evidence can include different tracks or running order, or ripping-log details such as TOC, peak levels and pre-gaps.".into(),
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Catalog or packaging differences alone do not establish a distinct edition.".into(),
                         "A distinct edition requires significantly and meaningfully different audio content.".into(),
-                        "Identify tracklist or running order as concrete evidence to compare. Stating only that the audio must differ does not cover this evidence requirement.".into(),
-                        "Identify at least one ripping-log detail such as TOC, peak levels or pre-gaps as concrete evidence to compare. Stating only that the audio must differ does not cover this evidence requirement.".into(),
+                        "Identify at least one concrete form of evidence of meaningful audio differences.".into(),
                     ],
                     optional_points: vec![
-                        "Bonus tracks may establish different audio content.".into(),
+                        "Evidence can include tracklist, running order, bonus tracks or ripping-log details such as TOC, peak levels and pre-gaps; no particular example or combination is required.".into(),
                     ],
                     contradictions: vec!["Every different pressing is allowed to coexist.".into()],
                 },
@@ -775,15 +785,22 @@ pub(super) fn bank() -> QuestionBank {
                 question_id: "dupes-320-v0-coexist".into(),
                 topic_id: "dupes".into(),
                 prompt: "Can MP3 320 CBR and V0 coexist for the same edition on Orpheus?".into(),
-                reference_answer: "Yes. Both may coexist, provided no duplicate rip with the same bitrate and format already exists.".into(),
+                reference_answer: "Yes. If MP3 320 CBR already exists for an edition, you may upload V0 as long as an equivalent V0 torrent does not already exist. Likewise, an existing V0 torrent does not block a 320 CBR upload if an equivalent 320 CBR torrent is absent. Neither encoding trumps the other.".into(),
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "MP3 320 CBR and V0 may coexist, provided neither duplicates an existing rip in its bitrate and format.".into(),
+                        "MP3 320 CBR and V0 may coexist for the same edition. Accept an explanation that an existing 320 CBR torrent still allows a V0 upload, or vice versa; the learner need not state both directions.".into(),
                     ],
-                    optional_points: vec![],
-                    contradictions: vec!["V0 always trumps 320 CBR.".into()],
+                    optional_points: vec![
+                        "The encoding being uploaded must not already have an equivalent torrent: V0 must be absent to add V0, and 320 CBR must be absent to add 320 CBR.".into(),
+                    ],
+                    contradictions: vec![
+                        "V0 always trumps 320 CBR.".into(),
+                        "320 CBR always trumps V0.".into(),
+                        "An existing 320 CBR torrent blocks a V0 upload, or an existing V0 torrent blocks a 320 CBR upload.".into(),
+                        "Duplicate rips in the same bitrate and format may be uploaded.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -956,9 +973,11 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "The horizontal axis shows time.".into(),
-                        "The vertical axis shows frequency in Hz/kHz.".into(),
+                        "The vertical axis shows frequency.".into(),
                     ],
-                    optional_points: vec![],
+                    optional_points: vec![
+                        "Frequency is measured in Hz or kHz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -992,9 +1011,11 @@ pub(super) fn bank() -> QuestionBank {
                 }],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
+                        "The diagram shows audio content extending above the typical upper human hearing limit.".into(),
+                    ],
+                    optional_points: vec![
                         "The content reaches about 22 kHz, above the typical upper hearing limit of about 20 kHz.".into(),
                     ],
-                    optional_points: vec![],
                     contradictions: vec![],
                 },
             },
@@ -1045,9 +1066,11 @@ pub(super) fn bank() -> QuestionBank {
                 }],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Faint background noise extending to about 22 kHz supports a lossless source.".into(),
+                        "Background noise extending into the high frequencies supports a lossless source.".into(),
                     ],
-                    optional_points: vec![],
+                    optional_points: vec![
+                        "The faint background noise extends to about 22 kHz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -1102,7 +1125,7 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Explicitly state the guide's MP3 320 kbps CBR cutoff of 20.5 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
-                        "The spike tips are near the 20.5 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                        "The spike tips are near or slightly below the 20.5 kHz reference. Accept 'near' or 'below' without requiring a numerical spike-height estimate. Also accept a different comparison supported by a spike-height estimate within 19.5 to 20.5 kHz. A claim that the spikes are far below or far above the reference does not cover this point.".into(),
                     ],
                     optional_points: vec![
                         "The tallest purple spikes reach around 20 kHz. Accept rough estimates within 19.5 to 20.5 kHz, including equivalent values in Hz.".into(),
@@ -1141,7 +1164,7 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Explicitly state the guide's MP3 256 kbps CBR cutoff of 20 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
-                        "The spike tips are near the 20 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                        "The spike tips are near or slightly below the 20 kHz reference. Accept 'near' or 'below' without requiring a numerical spike-height estimate. Also accept a different comparison supported by a spike-height estimate within 19 to 20 kHz. A claim that the spikes are far below or far above the reference does not cover this point.".into(),
                     ],
                     optional_points: vec![
                         "The tallest purple spikes reach around 19.5 kHz. Accept rough estimates within 19 to 20 kHz, including equivalent values in Hz.".into(),
@@ -1180,7 +1203,7 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Explicitly state the guide's MP3 192 kbps CBR cutoff of 19 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
-                        "The spike tips are near the 19 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                        "The spike tips are near or slightly below the 19 kHz reference. Accept 'near' or 'below' without requiring a numerical spike-height estimate. Also accept a different comparison supported by a spike-height estimate within 18 to 19.5 kHz. A claim that the spikes are far below or far above the reference does not cover this point.".into(),
                     ],
                     optional_points: vec![
                         "The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into(),
@@ -1219,7 +1242,7 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Explicitly state the guide's MP3 V2 cutoff of 18.5 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
-                        "The spike tips are near the 18.5 kHz reference, or slightly above it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                        "The spike tips are near or slightly above the 18.5 kHz reference. Accept 'near' or 'above' without requiring a numerical spike-height estimate. Also accept a different comparison supported by a spike-height estimate within 18 to 19.5 kHz. A claim that the spikes are far below or far above the reference does not cover this point.".into(),
                     ],
                     optional_points: vec![
                         "The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into(),
@@ -1258,7 +1281,7 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Explicitly state the guide's MP3 128 kbps CBR cutoff of 16 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
-                        "The spike tips are near the 16 kHz reference, or slightly above it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                        "The spike tips are near or slightly above the 16 kHz reference. Accept 'near' or 'above' without requiring a numerical spike-height estimate. Also accept a different comparison supported by a spike-height estimate within 16 to 17 kHz. A claim that the spikes are far below or far above the reference does not cover this point.".into(),
                     ],
                     optional_points: vec![
                         "The tallest purple spikes reach around 16 to 17 kHz. Accept rough estimates within 16 to 17 kHz, including equivalent values in Hz.".into(),
@@ -1328,32 +1351,14 @@ pub(super) fn bank() -> QuestionBank {
                 }],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "The cutoff near 18.5 to 19 kHz suggests a lossy source despite the FLAC format.".into(),
+                        "The high-frequency cutoff suggests a lossy source despite the FLAC format.".into(),
                     ],
-                    optional_points: vec![],
+                    optional_points: vec![
+                        "The cutoff is near 18.5 to 19 kHz, close to the guide's MP3 192 kbps CBR reference.".into(),
+                    ],
                     contradictions: vec![
                         "A FLAC extension or large file size proves a lossless source.".into(),
                     ],
-                },
-            },
-            QuestionDto {
-                question_id: "cd-cue-reading".into(),
-                topic_id: "cd".into(),
-                prompt: "Read the track layout in this cue excerpt: identify the audio track number, pre-gap and index position.".into(),
-                reference_answer: "It describes audio track 01, with PREGAP 00:00:32 and INDEX 01 at 00:00:00.".into(),
-                source_url: "https://interview.orpheus.network/cue-file.php".into(),
-                material: vec![ExerciseMaterialDto::Excerpt {
-                    description: "Selected fields from the official sample cue; omitted lines are not shown.".into(),
-                    text: "  TRACK 01 AUDIO\n    PREGAP 00:00:32\n    INDEX 01 00:00:00".into(),
-                }],
-                grading: AnswerCriteria::Explanation {
-                    required_points: vec![
-                        "The excerpt describes AUDIO track 01.".into(),
-                        "PREGAP is 00:00:32.".into(),
-                        "INDEX 01 is 00:00:00.".into(),
-                    ],
-                    optional_points: vec![],
-                    contradictions: vec![],
                 },
             },
             QuestionDto {
@@ -1435,8 +1440,7 @@ pub(super) fn bank() -> QuestionBank {
                         "Do not trade invites.".into(),
                         "Do not sell invites.".into(),
                         "Do not publicly offer invites, except as a designated recruiter in approved locations.".into(),
-                        "Do not request invites or accounts.".into(),
-                        "Do not send unsolicited invite requests.".into(),
+                        "Do not request invites or accounts outside permitted responses to Invites Forum offers.".into(),
                         "Messaging in response to an Invites Forum offer is permitted.".into(),
                     ],
                     optional_points: vec![
@@ -1455,9 +1459,12 @@ pub(super) fn bank() -> QuestionBank {
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Unintended buffer transfer/increase is ratio manipulation.".into(),
-                        "Reporting false data is cheating even with an approved client.".into(),
+                        "Reporting false data is cheating.".into(),
                     ],
-                    optional_points: vec!["Ask staff about uncertainty.".into()],
+                    optional_points: vec![
+                        "The prohibition applies even with an approved client.".into(),
+                        "Ask staff about uncertainty.".into(),
+                    ],
                     contradictions: vec![
                         "An approved client makes manipulated reports acceptable.".into(),
                     ],
@@ -1603,15 +1610,18 @@ pub(super) fn bank() -> QuestionBank {
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Challenge a decision privately with the deciding moderator, or Staff PM if unavailable.".into(),
+                        "Challenge a decision privately with the deciding moderator, or through Staff PM if unavailable; either applicable route is sufficient.".into(),
                         "Seek rule clarification via Staff PM.".into(),
-                        "Do not shop around moderators for a favorable answer.".into(),
-                        "An administrator may give a second opinion.".into(),
                     ],
                     optional_points: vec![
+                        "Do not shop around moderators for a favorable answer.".into(),
+                        "An administrator may give a second opinion.".into(),
                         "Respect staff and their final rule interpretation.".into(),
                     ],
-                    contradictions: vec!["User consensus overrides staff's interpretation.".into()],
+                    contradictions: vec![
+                        "User consensus overrides staff's interpretation.".into(),
+                        "It is acceptable to contact multiple moderators until one gives a favorable answer.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1633,18 +1643,19 @@ pub(super) fn bank() -> QuestionBank {
                 question_id: "rules-commercial".into(),
                 topic_id: "rules".into(),
                 prompt: "What commercial uses of Orpheus services or user data are prohibited?".into(),
-                reference_answer: "No. Commercializing services or user data, referral schemes, solicitations and money offers are prohibited.".into(),
+                reference_answer: "Commercializing services or user data is prohibited. This includes referral schemes, financial solicitations and money offers.".into(),
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Commercial gain is prohibited.".into(),
-                        "Referral schemes are prohibited.".into(),
-                        "Solicitations are prohibited.".into(),
-                        "Money offers are prohibited.".into(),
+                        "Commercial use of Orpheus services or user data is prohibited.".into(),
                     ],
-                    optional_points: vec![],
-                    contradictions: vec![],
+                    optional_points: vec![
+                        "Referral schemes, financial solicitations and money offers are prohibited.".into(),
+                    ],
+                    contradictions: vec![
+                        "Commercial referral schemes, financial solicitations or money offers through Orpheus are permitted.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1656,10 +1667,13 @@ pub(super) fn bank() -> QuestionBank {
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Use only paid, self-hosted or seedbox VPN/proxy services; free services are prohibited.".into(),
+                        "Paid VPN/proxy services are permitted; free services are prohibited.".into(),
                         "Tor browsing is prohibited.".into(),
                     ],
-                    optional_points: vec!["Ask staff when uncertain.".into()],
+                    optional_points: vec![
+                        "Permitted examples include self-hosted services and VPN/proxy services supplied with a paid seedbox.".into(),
+                        "Ask staff when uncertain.".into(),
+                    ],
                     contradictions: vec!["Any free VPN is allowed.".into()],
                 },
             },

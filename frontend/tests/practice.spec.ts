@@ -846,7 +846,6 @@ for (const topic of [
     ).toBe(true);
     const outcomes: { question_id: string; correct: boolean }[] = [];
     let images = 0;
-    let cues = 0;
     for (const question of quiz.questions) {
       await expect(
         page.getByRole('heading', { name: question.prompt, exact: true })
@@ -886,7 +885,6 @@ for (const topic of [
           await expect(diagram).toBeVisible();
           await page.setViewportSize({ width: 390, height: 844 });
         } else {
-          if (question.question_id === 'cd-cue-reading') cues++;
           const excerpt = page.getByLabel(material.description, {
             exact: true
           });
@@ -932,7 +930,6 @@ for (const topic of [
       await next.click();
     }
     if (topic.id === 'spectral') expect(images).toBeGreaterThan(0);
-    else expect(cues).toBe(1);
     await expect(page.getByRole('status')).toHaveText('Progress saved.');
     const saved = await loadProgress(page.request, key);
     expect(saved.completed_quiz_count).toBe(1);

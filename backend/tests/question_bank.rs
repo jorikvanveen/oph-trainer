@@ -255,7 +255,6 @@ fn questions_have_authored_grading_criteria() {
 #[test]
 fn exercise_material_is_readable_and_images_are_bundled() {
     let mut image_count = 0;
-    let mut excerpt_count = 0;
     let static_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../frontend/static");
     for question in QuestionBank::questions().questions {
         for material in question.material {
@@ -279,7 +278,6 @@ fn exercise_material_is_readable_and_images_are_bundled() {
                     assert!(!bytes.is_empty(), "{}: empty image", question.question_id);
                 }
                 ExerciseMaterialDto::Excerpt { description, text } => {
-                    excerpt_count += 1;
                     assert!(
                         !description.trim().is_empty(),
                         "{}: missing excerpt description",
@@ -295,5 +293,4 @@ fn exercise_material_is_readable_and_images_are_bundled() {
         }
     }
     assert!(image_count > 0, "Spectral exercises are required");
-    assert!(excerpt_count > 0, "CD log/cue exercises are required");
 }

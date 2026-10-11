@@ -54,8 +54,12 @@ pub(super) fn bank() -> QuestionBank {
                 reference_answer: "It represents the same audio more compactly, for example using very few bits for silence. Decoding reproduces all the recorded audio data.".into(),
                 source_url: AUDIO_FORMATS_SOURCE.into(),
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Compression uses a more efficient encoding, such as representing silence with very few bits instead of the fixed uncompressed allocation.".into()],
-                    optional_points: vec![],
+                    required_points: vec![
+                        "Compression represents the same audio data more efficiently without losing information.".into(),
+                    ],
+                    optional_points: vec![
+                        "Silence can be represented with very few bits instead of the fixed uncompressed allocation.".into(),
+                    ],
                     contradictions: vec!["Compression removes audio information or inaudible frequencies.".into(), "Lossless compression reduces audio quality.".into()],
                 },
             },
