@@ -799,9 +799,11 @@ for (const topic of [
         page.getByRole('heading', { name: 'Reference answer', exact: true })
       ).toHaveCount(0);
       for (const material of question.material) {
-        await expect(
-          page.locator('figcaption').filter({ hasText: material.description })
-        ).toBeVisible();
+        const caption = page
+          .locator('figcaption')
+          .filter({ hasText: material.description });
+        if (material.type === 'image') await expect(caption).toHaveCount(0);
+        else await expect(caption).toBeVisible();
         if (material.type === 'image') {
           images++;
           const diagram = page.getByRole('img', {

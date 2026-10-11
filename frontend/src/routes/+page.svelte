@@ -6,7 +6,11 @@
   import TopicIcon from '#lib/TopicIcon.svelte';
 
   const appState = getAppState();
-  const available = $derived(appState.catalog?.questions.filter((q) => appState.selected.includes(q.topic_id)).length ?? 0);
+  const available = $derived(
+    appState.catalog?.questions.filter((q) =>
+      appState.selected.includes(q.topic_id)
+    ).length ?? 0
+  );
 
   async function startQuiz() {
     if (await appState.startQuiz()) await goto('/quiz/');
@@ -14,37 +18,72 @@
 
   function toggleTopic(id: string) {
     appState.selected = appState.selected.includes(id)
-      ? appState.selected.filter((topic) => topic !== id) : [...appState.selected, id];
+      ? appState.selected.filter((topic) => topic !== id)
+      : [...appState.selected, id];
   }
 </script>
 
 <h1 class="sr-only" tabindex="-1">Practice</h1>
 {#if appState.catalog}
   <section class="topics-section" aria-label="Topics">
-        <div class="practice-toolbar">
-          <div class="quiz-controls">
-            {#if appState.selected.length < appState.catalog.topics.length}<button class="ghost reset-selection" aria-label="Select all topics" title="Select all topics" disabled={appState.busy} onclick={() => { appState.selected = appState.catalog!.topics.map((topic) => topic.topic_id); }}><RotateCcw size={14} focusable="false" /></button>{/if}
-            <span class="quiz-size">{Math.min(10, available)} questions</span>
-            <button disabled={appState.busy || appState.selected.length === 0} onclick={startQuiz}>{appState.busy ? 'Starting...' : 'Start quiz'} <ArrowRight size={16} focusable="false" /></button>
-          </div>
-        </div>
-        <div class="topic-grid">
-          {#each appState.catalog.topics as topic}
-            {@const metrics = appState.progress?.by_topic[topic.topic_id]}
-            <label class="topic-card card" class:topic-selected={appState.selected.includes(topic.topic_id)}>
-              <span class="topic-top"><TopicIcon topic={topic.topic_id} />
-                <input type="checkbox" aria-label={`Select ${topic.name}`} checked={appState.selected.includes(topic.topic_id)} disabled={appState.busy} onchange={() => toggleTopic(topic.topic_id)} />
-              </span>
-              <span class="topic-name">{topic.name}</span>
-              {#if metrics}
-                <span class="topic-meta">{metrics.covered_questions}/{metrics.available_questions} practiced</span>
-                <progress class="topic-progress" max="100" value={metrics.coverage_percentage} aria-label={`${topic.name} coverage`}></progress>
-              {/if}
-            </label>
-          {/each}
-        </div>
-      </section>
-      {#if appState.accountKey}<div class="key-offer"><button class="ghost" disabled={appState.busy} onclick={() => { appState.accountOpen = true; }}>Save your account key</button></div>{/if}
+    <div class="practice-toolbar">
+      <div class="quiz-controls">
+        {#if appState.selected.length < appState.catalog.topics.length}<button
+            class="ghost reset-selection"
+            aria-label="Select all topics"
+            title="Select all topics"
+            disabled={appState.busy}
+            onclick={() => {
+              appState.selected = appState.catalog!.topics.map(
+                (topic) => topic.topic_id
+              );
+            }}
+          >
+            <RotateCcw size={14} focusable="false" />
+          </button>{/if}
+        <span class="quiz-size">{Math.min(10, available)} questions</span>
+        <button
+          disabled={appState.busy || appState.selected.length === 0}
+          onclick={startQuiz}
+        >
+          {appState.busy ? 'Starting...' : 'Start quiz'}
+          <ArrowRight size={16} focusable="false" />
+        </button>
+      </div>
+    </div>
+    <div class="topic-grid">
+      {#each appState.catalog.topics as topic}
+        {@const metrics = appState.progress?.by_topic[topic.topic_id]}
+        <label
+          class="topic-card card"
+          class:topic-selected={appState.selected.includes(topic.topic_id)}
+        >
+          <span class="topic-top">
+            <TopicIcon topic={topic.topic_id} />
+            <input
+              type="checkbox"
+              aria-label={`Select ${topic.name}`}
+              checked={appState.selected.includes(topic.topic_id)}
+              disabled={appState.busy}
+              onchange={() => toggleTopic(topic.topic_id)}
+            />
+          </span>
+          <span class="topic-name">{topic.name}</span>
+          {#if metrics}
+            <span class="topic-meta">
+              {metrics.covered_questions}/{metrics.available_questions} practiced
+            </span>
+            <progress
+              class="topic-progress"
+              max="100"
+              value={metrics.coverage_percentage}
+              aria-label={`${topic.name} coverage`}
+            ></progress>
+          {/if}
+        </label>
+      {/each}
+    </div>
+  </section>
 {/if}
 
 <style>
@@ -184,8 +223,13 @@
     transform: translateY(-1px) rotate(-45deg);
   }
 
-  .topic-top input:disabled { opacity: 0.5; }
-  .reset-selection { width: 32px; padding: 0; }
+  .topic-top input:disabled {
+    opacity: 0.5;
+  }
+  .reset-selection {
+    width: 32px;
+    padding: 0;
+  }
 
   .topic-name {
     display: block;
@@ -229,12 +273,6 @@
     margin-top: 12px;
   }
 
-  .key-offer {
-    display: flex;
-    justify-content: flex-end;
-    margin: 23px 0 0;
-  }
-
   @media (max-width: 720px) {
     .topic-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -252,7 +290,8 @@
       margin-left: auto;
     }
 
-    .quiz-controls > button, .quiz-size {
+    .quiz-controls > button,
+    .quiz-size {
       font-size: 11px;
     }
 
@@ -277,5 +316,4 @@
       font-size: 10px;
     }
   }
-
 </style>

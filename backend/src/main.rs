@@ -20,6 +20,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .init();
 
     let config = Config::load()?;
+    if config.openrouter_api_key.is_none() {
+        tracing::warn!(
+            "OPH_OPENROUTER_API_KEY is not set or is blank; automatic explanation grading is disabled"
+        );
+    }
     let grading = GradingService::new(config.openrouter_api_key.clone())?;
     let mut options = ConnectOptions::new(config.database_url);
     options.sqlx_logging(false);

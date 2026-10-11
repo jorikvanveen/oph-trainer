@@ -88,7 +88,7 @@ pub(super) fn bank() -> QuestionBank {
                 question_id: "mp3-lame".into(),
                 topic_id: "mp3".into(),
                 material: vec![],
-                prompt: "Which MP3 encoder does the official guide recommend?".into(),
+                prompt: "Which MP3 encoder is recommended for uploads to Orpheus?".into(),
                 reference_answer: "LAME, for its open source code, customization, and high quality output.".into(),
                 source_url: MP3_SOURCE.into(),
                 grading: AnswerCriteria::ShortAnswer {

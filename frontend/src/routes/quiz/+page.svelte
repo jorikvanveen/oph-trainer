@@ -160,13 +160,13 @@
     <h2>{current.prompt}</h2>
     {#each current.material as material}
       <figure class="exercise">
-        <figcaption>{material.description}</figcaption>
         {#if material.type === 'image'}
           <img src={material.src} alt={material.description} />
           <a href={material.src} target="_blank" rel="noreferrer">
             Open full-size diagram<ExternalLink size={14} focusable="false" />
           </a>
         {:else}
+          <figcaption>{material.description}</figcaption>
           <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard focus lets readers scroll long excerpts horizontally.) -->
           <pre
             role="region"
@@ -177,12 +177,6 @@
     {/each}
     <form onsubmit={submitAnswer}>
       <label class="answer-label" for="answer">Your answer</label>
-      {#if current.grading.type === 'explanation'}
-        <p class="grading-notice">
-          Automatic grading sends your answer and grading context to OpenRouter
-          and TypeSafe. It is free; no model key is needed.
-        </p>
-      {/if}
       <textarea
         id="answer"
         class="answer-input"
@@ -498,13 +492,6 @@
     font-weight: 400;
     line-height: 1.45;
     margin: 22px 0 0;
-  }
-
-  .grading-notice {
-    font-size: 12px;
-    color: #626d59;
-    line-height: 1.6;
-    margin: 0 0 12px;
   }
 
   .answer-label {
