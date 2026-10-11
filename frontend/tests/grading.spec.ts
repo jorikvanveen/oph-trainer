@@ -43,7 +43,9 @@ test('point feedback survives correction and only final outcomes are saved', asy
         required_points: question.grading.required_points.map(
           (point, index) => ({ point, covered: correct || index !== 0 })
         ),
-        contradictions: correct ? [] : [question.grading.contradictions[0]]
+        contradictions: correct
+          ? []
+          : question.grading.contradictions.slice(0, 1)
       }
     };
     await route.fulfill({ json: feedback });
@@ -61,7 +63,9 @@ test('point feedback survives correction and only final outcomes are saved', asy
       );
     await page.getByRole('button', { name: /^(Check|Review) answer$/ }).click();
     await expect(
-      page.getByText(question.reference_answer, { exact: true })
+      page
+        .getByRole('paragraph')
+        .and(page.getByText(question.reference_answer, { exact: true }))
     ).toBeVisible();
     if (question.grading.type === 'explanation') {
       const correct = explanations === 1;
@@ -73,7 +77,7 @@ test('point feedback survives correction and only final outcomes are saved', asy
         (point, index) =>
           `${correct || index !== 0 ? 'Covered' : 'Missed'} ${point}`
       );
-      if (!correct) labels.push(question.grading.contradictions[0]);
+      if (!correct) labels.push(...question.grading.contradictions.slice(0, 1));
       await expect(details.getByRole('listitem')).toHaveText(labels);
       if (!correct) {
         await page

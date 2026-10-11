@@ -117,7 +117,9 @@ async function submit(page: Page, answer: string): Promise<AnswerFeedbackDto> {
     page.getByRole('heading', { name: 'Reference answer', exact: true })
   ).toBeVisible();
   await expect(
-    page.getByText(feedback.reference_answer, { exact: true })
+    page
+      .getByRole('paragraph')
+      .and(page.getByText(feedback.reference_answer, { exact: true }))
   ).toBeVisible();
   await expect(
     page.getByRole('link', { name: 'Official guide', exact: false })
@@ -780,9 +782,9 @@ for (const topic of [
     const pool = catalog.questions.filter(
       (question) => question.topic_id === topic.id
     );
-    expect(quiz.questions).toHaveLength(pool.length);
+    expect(quiz.questions).toHaveLength(Math.min(10, pool.length));
     expect(new Set(quiz.questions.map((q) => q.question_id)).size).toBe(
-      pool.length
+      quiz.questions.length
     );
     expect(
       quiz.questions.every((question) => question.topic_id === topic.id)
@@ -883,7 +885,9 @@ for (const topic of [
     const saved = await loadProgress(page.request, key);
     expect(saved.history).toEqual([{ quiz_id: quiz.quiz_id, outcomes }]);
     expect(saved.by_topic[topic.id].available_questions).toBe(pool.length);
-    expect(saved.by_topic[topic.id].covered_questions).toBe(pool.length);
+    expect(saved.by_topic[topic.id].covered_questions).toBe(
+      quiz.questions.length
+    );
     expect(saved.by_topic[topic.id].correct_percentage).toBe(100);
     await page.reload();
     await page
@@ -891,7 +895,7 @@ for (const topic of [
       .click();
     await expect(
       page.getByRole('group', { name: `${topic.name} progress`, exact: true })
-    ).toContainText(`${pool.length} completed answers`);
+    ).toContainText(`${quiz.questions.length} completed answers`);
     expect(await loadProgress(page.request, key)).toEqual(saved);
     expect(externalRequests).toEqual([]);
   });
