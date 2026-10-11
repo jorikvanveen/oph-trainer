@@ -1,5 +1,4 @@
 <script lang="ts">
-  import Disc3 from '@lucide/svelte/icons/disc-3';
   import BookOpen from '@lucide/svelte/icons/book-open';
   import { onMount, type Snippet } from 'svelte';
   import {
@@ -98,43 +97,30 @@
 
 <div class="app-shell">
   <header class="topbar">
-    <div class="topbar-left">
+    <nav
+      class="header-nav"
+      aria-label="Main navigation"
+      data-sveltekit-preload-code="eager"
+    >
       <a
-        class="brand control ghost"
-        aria-label="Interview trainer home"
+        class="nav-item control ghost"
+        class:nav-active={page.url.pathname !== '/progress/'}
+        aria-current={page.url.pathname !== '/progress/' ? 'page' : undefined}
         href="/"
         aria-disabled={appState.busy}
       >
-        <span class="brand-mark">
-          <Disc3 size={23} strokeWidth={1.25} focusable="false" />
-        </span>
-        <span>interview trainer</span>
+        Practice
       </a>
-      <nav
-        class="header-nav"
-        aria-label="Main navigation"
-        data-sveltekit-preload-code="eager"
+      <a
+        class="nav-item control ghost"
+        class:nav-active={page.url.pathname === '/progress/'}
+        aria-current={page.url.pathname === '/progress/' ? 'page' : undefined}
+        href="/progress/"
+        aria-disabled={appState.busy}
       >
-        <a
-          class="nav-item control ghost"
-          class:nav-active={page.url.pathname !== '/progress/'}
-          aria-current={page.url.pathname !== '/progress/' ? 'page' : undefined}
-          href="/"
-          aria-disabled={appState.busy}
-        >
-          Practice
-        </a>
-        <a
-          class="nav-item control ghost"
-          class:nav-active={page.url.pathname === '/progress/'}
-          aria-current={page.url.pathname === '/progress/' ? 'page' : undefined}
-          href="/progress/"
-          aria-disabled={appState.busy}
-        >
-          Your progress
-        </a>
-      </nav>
-    </div>
+        Your progress
+      </a>
+    </nav>
     <div class="topbar-right">
       <button
         class="ghost"
@@ -370,47 +356,14 @@
     backdrop-filter: blur(12px);
   }
 
-  .topbar-left,
   .topbar-right,
   .header-nav {
     display: flex;
     align-items: center;
   }
 
-  .topbar-left {
-    gap: 32px;
-  }
-
   .topbar-right {
     gap: 12px;
-  }
-
-  a.brand.control {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    padding: 0;
-    min-height: 0;
-    color: #242a27;
-  }
-
-  .brand > span:last-child {
-    font-family: Georgia, serif;
-    font-size: 27px;
-    letter-spacing: -1px;
-    line-height: 1;
-  }
-
-  .brand-mark {
-    height: 32px;
-    width: 32px;
-    border-radius: 50%;
-    background: #335c49;
-    color: #edf3e7;
-    display: grid;
-    place-items: center;
-    font-size: 25px;
-    font-weight: 400;
   }
 
   .header-nav {
@@ -522,10 +475,6 @@
     .topbar {
       padding: 12px 24px;
     }
-
-    .topbar-left {
-      gap: 20px;
-    }
   }
 
   @media (max-width: 520px) {
@@ -533,10 +482,6 @@
       min-height: 60px;
       padding: 10px 14px;
       gap: 8px;
-    }
-
-    .topbar-left {
-      gap: 10px;
     }
 
     .topbar-right {
@@ -552,15 +497,6 @@
     .guide-link {
       width: 30px;
       height: 32px;
-    }
-
-    .brand > span:last-child {
-      display: none;
-    }
-
-    .brand-mark {
-      height: 28px;
-      width: 28px;
     }
 
     .header-nav {
