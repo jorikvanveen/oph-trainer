@@ -430,7 +430,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "20 kHz",
             "19.5 to 20.5 kHz",
             "20.5 kHz",
-            "The boundary is slightly below or approximately matches the 20.5 kHz reference.",
+            "The spike tips are near the 20.5 kHz reference, or slightly below it.",
             "MP3 320 kbps CBR",
             "C",
         ),
@@ -440,7 +440,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "19.5 kHz",
             "19 to 20 kHz",
             "20 kHz",
-            "The boundary is slightly below or approximately matches the 20 kHz reference.",
+            "The spike tips are near the 20 kHz reference, or slightly below it.",
             "MP3 256 kbps CBR",
             "D",
         ),
@@ -450,7 +450,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "18.5 to 19 kHz",
             "18 to 19.5 kHz",
             "19 kHz",
-            "The boundary approximately matches the 19 kHz reference, or is slightly below it.",
+            "The spike tips are near the 19 kHz reference, or slightly below it.",
             "MP3 192 kbps CBR",
             "F",
         ),
@@ -460,7 +460,7 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "18.5 to 19 kHz",
             "18 to 19.5 kHz",
             "18.5 kHz",
-            "The boundary approximately matches the 18.5 kHz reference, or is slightly above it.",
+            "The spike tips are near the 18.5 kHz reference, or slightly above it.",
             "MP3 V2",
             "G",
         ),
@@ -470,23 +470,28 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "16 to 17 kHz",
             "16 to 17 kHz",
             "16 kHz",
-            "The boundary approximately matches the 16 kHz reference, or is slightly above it.",
+            "The spike tips are near the 16 kHz reference, or slightly above it.",
             "MP3 128 kbps CBR",
             "H",
         ),
     ] {
         let observation = format!(
-            "The upper boundary of the prominent purple/red content is around {cutoff}. Accept rough estimates within {accepted_range}, including equivalent values in Hz."
+            "The tallest purple spikes reach around {cutoff}. Accept rough estimates within {accepted_range}, including equivalent values in Hz. The continuous band near 16 kHz is a different feature."
+        );
+        let comparison_criterion = format!(
+            "{comparison} Accept 'near' or the stated slight difference. A claim that the spikes are far below or far above the reference does not cover this point."
         );
         let mut question = explain(
             id,
             "spectral",
             SPECTRALS,
             &format!(
-                "Estimate the top edge of the purple band in kHz. Is it below, near, or above the {guide_cutoff} {encoding} reference cutoff?"
+                "How high do the tallest purple spikes reach, in kHz? Is that below, near, or above the {guide_cutoff} {encoding} reference cutoff?"
             ),
-            &format!("The prominent purple/red content ends around {cutoff}. {comparison}"),
-            &[&observation, comparison],
+            &format!(
+                "The tallest purple spikes reach about {cutoff}. {comparison} The continuous band ends near 16 kHz."
+            ),
+            &[&observation, &comparison_criterion],
             &[],
             &[],
         );
