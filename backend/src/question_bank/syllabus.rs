@@ -726,20 +726,49 @@ pub(super) fn bank() -> QuestionBank {
                 },
             },
             QuestionDto {
-                question_id: "dupes-lossy-hierarchy".into(),
+                question_id: "dupes-cbr-bitrate-trump".into(),
                 topic_id: "dupes".into(),
-                prompt: "How do higher CBR/ABR bitrates, MP3 320 CBR and V0 affect lossy trumps?".into(),
-                reference_answer: "Higher CBR replaces lower CBR; higher ABR replaces lower ABR. MP3 320 CBR or V0 trumps CBR below 320.".into(),
+                prompt: "For the same edition and media, can an MP3 256 kbps CBR torrent trump an existing MP3 192 kbps CBR torrent on Orpheus? Explain the bitrate rule.".into(),
+                reference_answer: "Yes. Within CBR, a higher-bitrate torrent trumps a lower-bitrate torrent of the same edition and media.".into(),
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Higher CBR trumps lower CBR.".into(),
-                        "Higher ABR trumps lower ABR.".into(),
-                        "MP3 320 CBR and V0 trump CBR below 320.".into(),
+                        "Yes, 256 kbps CBR can trump 192 kbps CBR because higher-bitrate CBR trumps lower-bitrate CBR.".into(),
                     ],
                     optional_points: vec![],
-                    contradictions: vec!["V0 always trumps 320 CBR.".into()],
+                    contradictions: vec!["Different CBR bitrates always coexist without trumping each other.".into()],
+                },
+            },
+            QuestionDto {
+                question_id: "dupes-abr-bitrate-trump".into(),
+                topic_id: "dupes".into(),
+                prompt: "For the same edition and media, can an MP3 256 kbps ABR torrent trump an existing MP3 192 kbps ABR torrent on Orpheus? Explain the bitrate rule.".into(),
+                reference_answer: "Yes. Within ABR, a higher-bitrate torrent trumps a lower-bitrate torrent of the same edition and media.".into(),
+                source_url: DUPES.into(),
+                material: vec![],
+                grading: AnswerCriteria::Explanation {
+                    required_points: vec![
+                        "Yes, 256 kbps ABR can trump 192 kbps ABR because higher-bitrate ABR trumps lower-bitrate ABR.".into(),
+                    ],
+                    optional_points: vec![],
+                    contradictions: vec!["Different ABR bitrates always coexist without trumping each other.".into()],
+                },
+            },
+            QuestionDto {
+                question_id: "dupes-mp3-320-v0-trump".into(),
+                topic_id: "dupes".into(),
+                prompt: "An MP3 256 kbps CBR torrent is already on Orpheus. Which two MP3 encoding options can each trump it for the same edition and media?".into(),
+                reference_answer: "MP3 320 kbps CBR and MP3 V0. Either can trump a CBR torrent below 320 kbps.".into(),
+                source_url: DUPES.into(),
+                material: vec![],
+                grading: AnswerCriteria::Explanation {
+                    required_points: vec![
+                        "MP3 320 kbps CBR can trump the 256 kbps CBR torrent.".into(),
+                        "MP3 V0 can trump the 256 kbps CBR torrent.".into(),
+                    ],
+                    optional_points: vec![],
+                    contradictions: vec!["MP3 V0 cannot trump a CBR torrent below 320 kbps.".into()],
                 },
             },
             QuestionDto {
