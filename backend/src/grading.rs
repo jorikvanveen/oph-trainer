@@ -74,6 +74,7 @@ impl GradingService {
         true
     }
 
+    #[tracing::instrument(name = "explanation_grading", level = "error", skip_all, fields(question_id = %question.question_id))]
     pub async fn grade(
         &self,
         question: &QuestionDto,
@@ -89,10 +90,24 @@ impl GradingService {
             return None;
         };
         if required_points.is_empty() {
+            tracing::warn!(
+                reason = "no_required_points",
+                "Using self-assessment for explanation"
+            );
             return None;
         }
-        let key = self.api_key.as_ref()?;
+        let Some(key) = self.api_key.as_ref() else {
+            tracing::info!(
+                reason = "not_configured",
+                "Using self-assessment for explanation"
+            );
+            return None;
+        };
         if !self.try_consume_quota(peer, Instant::now()) {
+            tracing::warn!(
+                reason = "rate_limited",
+                "Using self-assessment for explanation"
+            );
             return None;
         }
         let mut questions = serde_json::Map::new();
@@ -129,8 +144,10 @@ impl GradingService {
             },
             "questions": questions
         });
+        let started = Instant::now();
+        tracing::info!(model = MODEL, "Requesting explanation grade");
         // Include body consumption in the deadline, even for a streaming or stalled response.
-        tokio::time::timeout(TIMEOUT, async {
+        let result = tokio::time::timeout(TIMEOUT, async {
             let mut response = self
                 .client
                 .post(&self.endpoint)
@@ -138,21 +155,41 @@ impl GradingService {
                 .json(&payload)
                 .send()
                 .await
-                .ok()?;
+                .map_err(|error| {
+                    if error.is_timeout() {
+                        "provider_timeout"
+                    } else {
+                        "provider_request_failed"
+                    }
+                })?;
             if !response.status().is_success() {
-                return None;
+                tracing::warn!(
+                    status = response.status().as_u16(),
+                    "Grading provider rejected request"
+                );
+                return Err("provider_http_error");
             }
             let mut body = Vec::new();
-            while let Some(chunk) = response.chunk().await.ok()? {
+            while let Some(chunk) = response.chunk().await.map_err(|error| {
+                if error.is_timeout() {
+                    "provider_timeout"
+                } else {
+                    "provider_body_failed"
+                }
+            })? {
                 if body.len() + chunk.len() > 65_536 {
-                    return None;
+                    return Err("provider_response_too_large");
                 }
                 body.extend_from_slice(&chunk);
             }
-            let response: serde_json::Value = serde_json::from_slice(&body).ok()?;
-            let answers = response.get("answers")?.as_object()?;
+            let response: serde_json::Value =
+                serde_json::from_slice(&body).map_err(|_| "provider_invalid_json")?;
+            let answers = response
+                .get("answers")
+                .and_then(serde_json::Value::as_object)
+                .ok_or("provider_invalid_decisions")?;
             if answers.len() != required_points.len() + contradictions.len() {
-                return None;
+                return Err("provider_invalid_decisions");
             }
             let choice = |id: &str| {
                 let decision = answers.get(id)?;
@@ -166,10 +203,12 @@ impl GradingService {
                 contradictions: Vec::new(),
             };
             for (index, point) in required_points.iter().enumerate() {
-                let covered = match choice(&format!("required_{index}"))? {
+                let covered = match choice(&format!("required_{index}"))
+                    .ok_or("provider_invalid_decisions")?
+                {
                     "covered" => true,
                     "missing" => false,
-                    _ => return None,
+                    _ => return Err("provider_invalid_decisions"),
                 };
                 assessment.required_points.push(RequiredPointFeedbackDto {
                     point: point.clone(),
@@ -177,17 +216,39 @@ impl GradingService {
                 });
             }
             for (index, contradiction) in contradictions.iter().enumerate() {
-                match choice(&format!("contradiction_{index}"))? {
+                match choice(&format!("contradiction_{index}"))
+                    .ok_or("provider_invalid_decisions")?
+                {
                     "not_asserted" => {}
                     "asserted" => assessment.contradictions.push(contradiction.clone()),
-                    _ => return None,
+                    _ => return Err("provider_invalid_decisions"),
                 }
             }
-            Some(assessment)
+            Ok(assessment)
         })
         .await
-        .ok()
-        .flatten()
+        .unwrap_or(Err("provider_timeout"));
+        let elapsed_ms = started.elapsed().as_secs_f64() * 1000.0;
+        match result {
+            Ok(assessment) => {
+                tracing::info!(
+                    elapsed_ms,
+                    covered_points = assessment
+                        .required_points
+                        .iter()
+                        .filter(|point| point.covered)
+                        .count(),
+                    required_points = assessment.required_points.len(),
+                    contradictions = assessment.contradictions.len(),
+                    "Explanation grade received"
+                );
+                Some(assessment)
+            }
+            Err(reason) => {
+                tracing::warn!(reason, elapsed_ms, "Using self-assessment for explanation");
+                None
+            }
+        }
     }
 }
 

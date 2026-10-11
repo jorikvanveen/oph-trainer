@@ -53,6 +53,7 @@ pub fn api_with_grading(
         .route("/progress/quizzes", post(commit_quiz))
         .fallback(|| async { StatusCode::NOT_FOUND })
         .layer(axum::middleware::map_response(disable_caching))
+        .layer(axum::middleware::from_fn(crate::logging::log_request))
         .with_state(Arc::new(ApiState {
             practice,
             accounts,
@@ -87,6 +88,10 @@ async fn select_quiz(
     headers: HeaderMap,
     Json(request): Json<QuizSelectionRequestDto>,
 ) -> Result<Response, ApiError> {
+    let selected_topics = request
+        .topic_ids
+        .as_ref()
+        .map(|ids| ids.iter().collect::<std::collections::HashSet<_>>().len());
     let account_key = state.accounts.current(&headers).await?;
     let recent = match &account_key {
         Some(account_key) => state.accounts.recent_outcomes(account_key).await?,
@@ -99,6 +104,14 @@ async fn select_quiz(
         Some(_) => None,
         None => Some(state.accounts.create().await?.account_key),
     };
+    tracing::info!(
+        questions = quiz.questions.len(),
+        selected_topics,
+        general_practice = selected_topics.is_none(),
+        questions_with_history = recent.len(),
+        account_created = quiz.account_key.is_some(),
+        "Quiz selected"
+    );
     Ok(Json(quiz).into_response())
 }
 
@@ -146,6 +159,12 @@ async fn answer(
             feedback.explanation_feedback = Some(assessment);
         }
     }
+    tracing::info!(
+        question_id = %feedback.question_id,
+        status = ?feedback.status,
+        automatic_explanation_grading = feedback.explanation_feedback.is_some(),
+        "Answer assessed"
+    );
     Ok(Json(feedback))
 }
 
@@ -154,12 +173,16 @@ async fn progress(
     headers: HeaderMap,
 ) -> Result<Json<ProgressDto>, ApiError> {
     let account_key = state.accounts.require(&headers).await?;
-    Ok(Json(
-        state
-            .accounts
-            .progress(&account_key, &state.practice.catalog())
-            .await?,
-    ))
+    let progress = state
+        .accounts
+        .progress(&account_key, &state.practice.catalog())
+        .await?;
+    tracing::debug!(
+        completed_quizzes = progress.history.len(),
+        completed_answers = progress.overall.completed_answers,
+        "Progress loaded"
+    );
+    Ok(Json(progress))
 }
 
 async fn commit_quiz(
@@ -205,6 +228,7 @@ impl IntoResponse for ApiError {
             ApiErrorCodeDto::QuizConflict => StatusCode::CONFLICT,
             _ => StatusCode::BAD_REQUEST,
         };
+        tracing::debug!(code = ?self.0.code, "API operation rejected");
         (status, Json(self.0)).into_response()
     }
 }

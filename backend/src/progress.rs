@@ -74,6 +74,7 @@ impl AccountService {
         catalog: &QuestionCatalogDto,
     ) -> Result<(), ApiErrorDto> {
         let batch: HashSet<_> = quiz.question_ids.iter().collect();
+        let question_count = quiz.question_ids.len();
         let outcomes: HashSet<_> = quiz
             .outcomes
             .iter()
@@ -106,6 +107,7 @@ impl AccountService {
         .exec(&tx)
         .await
         .map_err(database_error)?;
+        let already_saved = matches!(inserted, TryInsertResult::Conflicted);
         match inserted {
             TryInsertResult::Conflicted => {
                 let previous = completed_quiz::Entity::find()
@@ -169,17 +171,23 @@ impl AccountService {
             TryInsertResult::Empty => return Err(database_error(DbErr::RecordNotInserted)),
         }
         tx.commit().await.map_err(database_error)?;
+        tracing::info!(
+            questions = question_count,
+            already_saved,
+            "Completed quiz saved"
+        );
         Ok(())
     }
 
     pub async fn reset_progress(&self, account_key: &str) -> Result<(), ApiErrorDto> {
         let tx = self.database().begin().await.map_err(database_error)?;
-        completed_quiz::Entity::delete_many()
+        let deleted = completed_quiz::Entity::delete_many()
             .filter(completed_quiz::Column::AccountKey.eq(account_key))
             .exec(&tx)
             .await
             .map_err(database_error)?;
         tx.commit().await.map_err(database_error)?;
+        tracing::info!(completed_quizzes = deleted.rows_affected, "Progress reset");
         Ok(())
     }
 }

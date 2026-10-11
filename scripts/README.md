@@ -42,6 +42,20 @@ To build and serve the app without Vite:
 
 The backend serves the app at `http://127.0.0.1:3000` by default. The development and start scripts leave environment configuration unchanged, including `OPH_BIND_ADDRESS`, `OPH_DATABASE_URL`, `OPH_STATIC_DIR`, `OPH_OPENROUTER_API_KEY`, `OPH_USE_X_FORWARDED_FOR`, and `RUST_LOG`. Relative backend paths resolve from `backend/`. For a trusted reverse proxy, `OPH_USE_X_FORWARDED_FOR=true` selects the first IP in `X-Forwarded-For` for grading rate limits; it defaults to `false`. See [proxy requirements and grading settings](../docs/grading.md).
 
+### Logging
+
+The backend logs startup stages, question-bank counts, account creation, quiz selection, answer assessment, saved quizzes and progress resets. Each API request has a process-local request ID, method, registered route, response status and elapsed milliseconds. Messages from the same request include its request context. Successful requests log at `info`, HTTP 4xx responses at `warn`, and HTTP 5xx responses at `error`. Static-file requests are excluded to keep page loads quiet. Request timing ends when the response is ready, before its body is sent.
+
+Explanation grading logs provider calls and results. Self-assessment fallback logs a reason, including missing configuration, rate limits, timeouts, provider HTTP failures, oversized responses and invalid decisions. Provider HTTP failures also log the status code.
+
+The default filter is `warn,oph_trainer_backend=info`, which shows app activity and dependency warnings. For request starts, progress counts and domain error codes, enable app debug logging:
+
+```sh
+RUST_LOG=warn,oph_trainer_backend=debug ./scripts/dev-backend.sh
+```
+
+Use `RUST_LOG=warn` for quieter output. Logs omit account keys, authorization headers, submitted answers, provider payloads and bodies, database URLs, arbitrary request paths and query strings. Question IDs in successful assessment logs come from the authored question bank. Avoid enabling dependency debug or trace logging when handling real credentials or answers.
+
 ## Browser-to-API tests
 
 Install dependencies with `npm ci --prefix frontend`. Run tests in the flake devshell with a local Chromium browser available:

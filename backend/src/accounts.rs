@@ -61,6 +61,7 @@ impl AccountService {
         .insert(&self.db)
         .await
         .map_err(database_error)?;
+        tracing::info!("Account created");
         Ok(AccountDto { account_key: key })
     }
 }

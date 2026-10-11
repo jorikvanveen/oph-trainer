@@ -446,12 +446,14 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "Spectral diagram L of the supplied piano excerpt after the stated conversion, with time and frequency axes.",
     ));
     bank.questions.push(piano_transcode);
-    for (id, file, cutoff, guide_cutoff, encoding, label) in [
+    for (id, file, cutoff, accepted_range, guide_cutoff, comparison, encoding, label) in [
         (
             "spectral-320",
             "spectrum-c.png",
             "20 kHz",
+            "19.5 to 20.5 kHz",
             "20.5 kHz",
+            "The boundary is slightly below or approximately matches the 20.5 kHz reference.",
             "MP3 320 kbps CBR",
             "C",
         ),
@@ -459,23 +461,19 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "spectral-256",
             "spectrum-d.png",
             "19.5 kHz",
+            "19 to 20 kHz",
             "20 kHz",
+            "The boundary is slightly below or approximately matches the 20 kHz reference.",
             "MP3 256 kbps CBR",
             "D",
-        ),
-        (
-            "spectral-v0",
-            "spectrum-e.png",
-            "21 to 22 kHz, with much weaker energy above 19 to 20 kHz",
-            "19.5 kHz",
-            "MP3 V0",
-            "E",
         ),
         (
             "spectral-192",
             "spectrum-f.png",
             "18.5 to 19 kHz",
+            "18 to 19.5 kHz",
             "19 kHz",
+            "The boundary approximately matches the 19 kHz reference, or is slightly below it.",
             "MP3 192 kbps CBR",
             "F",
         ),
@@ -483,7 +481,9 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "spectral-v2",
             "spectrum-g.png",
             "18.5 to 19 kHz",
+            "18 to 19.5 kHz",
             "18.5 kHz",
+            "The boundary approximately matches the 18.5 kHz reference, or is slightly above it.",
             "MP3 V2",
             "G",
         ),
@@ -491,26 +491,27 @@ fn spectral_questions(bank: &mut QuestionBank) {
             "spectral-128",
             "spectrum-h.png",
             "16 to 17 kHz",
+            "16 to 17 kHz",
             "16 kHz",
+            "The boundary approximately matches the 16 kHz reference, or is slightly above it.",
             "MP3 128 kbps CBR",
             "H",
         ),
     ] {
-        let observation = format!("The main spectral energy reaches approximately {cutoff}.");
-        let comparison = format!(
-            "Compare the observed upper frequencies of approximately {cutoff} with the supplied {encoding} reference cutoff of {guide_cutoff}."
+        let observation = format!(
+            "The upper boundary of the prominent purple/red content is around {cutoff}. Accept rough estimates within {accepted_range}, including equivalent values in Hz."
         );
         let mut question = explain(
             id,
             "spectral",
             SPECTRALS,
             &format!(
-                "A reference {encoding} spectrum has a cutoff at {guide_cutoff}. Estimate the upper edge of the main spectral energy in this diagram and compare it with the reference cutoff."
+                "Estimate the top edge of the purple band in kHz. Is it below, near, or above the {guide_cutoff} {encoding} reference cutoff?"
             ),
             &format!(
-                "The main spectral energy reaches about {cutoff}, compared with the supplied reference cutoff of {guide_cutoff}. This image was generated from a real {encoding} encode using LAME's defaults; encoder versions and settings can differ. Faint residual energy above the main edge does not establish a lossless source."
+                "The prominent purple/red content ends around {cutoff}. {comparison} This image was generated from a real {encoding} encode using LAME's defaults; encoder versions and settings can differ. Faint residual energy above this boundary does not establish a lossless source."
             ),
-            &[&observation, &comparison],
+            &[&observation, comparison],
             &[],
             &["A cutoff uniquely proves the exact MP3 bitrate or preset."],
         );
@@ -520,6 +521,24 @@ fn spectral_questions(bank: &mut QuestionBank) {
         ));
         bank.questions.push(question);
     }
+    let mut v0 = explain(
+        "spectral-v0",
+        "spectral",
+        SPECTRALS,
+        "This diagram has prominent purple/red content and weaker purple streaks above it. Roughly how high do those weaker streaks reach, in kHz? Do they stop at or extend above the Orpheus guide's 19.5 kHz cutoff for MP3 V0? An estimate to the nearest 1 kHz is enough.",
+        "The weaker purple streaks reach about 21 to 22 kHz, above the guide's 19.5 kHz reference. Most of the prominent content is below about 19 to 20 kHz. This image was generated from a real MP3 V0 encode using LAME's defaults; encoder versions and settings can differ. Content above the guide's reference cutoff does not establish a lossless source.",
+        &[
+            "The weaker purple streaks reach approximately 21 to 22 kHz, including equivalent values in Hz.",
+            "The weaker streaks extend above the 19.5 kHz reference cutoff.",
+        ],
+        &["Most of the prominent purple/red content is below about 19 to 20 kHz."],
+        &["A cutoff uniquely proves the exact MP3 bitrate or preset."],
+    );
+    v0.material.push(spectral(
+        "spectrum-e.png",
+        "Spectral diagram E with time and frequency axes.",
+    ));
+    bank.questions.push(v0);
     bank.questions.extend([
         explain(
             "spectral-cutoff-limits", "spectral", SPECTRALS,

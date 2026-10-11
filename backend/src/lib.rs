@@ -3,6 +3,7 @@ pub mod config;
 pub mod dto;
 pub mod entity;
 pub mod grading;
+mod logging;
 pub mod practice;
 pub mod progress;
 pub mod question_bank;
