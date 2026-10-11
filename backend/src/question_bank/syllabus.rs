@@ -642,7 +642,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "dupes-vbr-hierarchy".into(),
                 topic_id: "dupes".into(),
-                prompt: "Under Orpheus's trump rules, which current VBR presets can replace MP3 APS and APX, and can V0 replace V1?".into(),
+                prompt: "Under Orpheus's trump rules, which current VBR presets can replace MP3 APS, APX and V1?".into(),
                 reference_answer: "V2 replaces APS; V0 replaces APX and V1. V2 and V0 are separate protected endpoints in the chart, subject to the guide's upload restrictions.".into(),
                 source_url: DUPES.into(),
                 material: vec![],
@@ -1102,27 +1102,6 @@ pub(super) fn bank() -> QuestionBank {
                     required_points: vec!["The cutoff near 18.5 to 19 kHz suggests a lossy source despite the FLAC format.".into()],
                     optional_points: vec![],
                     contradictions: vec!["A FLAC extension or large file size proves a lossless source.".into()],
-                },
-            },
-            QuestionDto {
-                question_id: "cd-log-reading".into(),
-                topic_id: "cd".into(),
-                prompt: "From this log excerpt, identify the read mode, whether C2 pointers were used, and whether the two CRC values match. Does this excerpt give a whole-log checker score?".into(),
-                reference_answer: "Secure read mode; C2 pointers were not used. Test and copy CRCs match. The excerpt's track quality is not a whole-log checker score, which is not supplied here.".into(),
-                source_url: "https://interview.orpheus.network/log-file.php".into(),
-                material: vec![ExerciseMaterialDto::Excerpt {
-                    description: "Selected settings and track fields from the official EAC sample log; omitted lines are not shown.".into(),
-                    text: "Read mode               : Secure\nMake use of C2 pointers : No\n\nTrack  1\n     Track quality 100.0 %\n     Test CRC 02B2C5A6\n     Copy CRC 02B2C5A6".into(),
-                }],
-                grading: AnswerCriteria::Explanation {
-                    required_points: vec![
-                        "Read mode is Secure.".into(),
-                        "C2 pointers are disabled.".into(),
-                        "Test and copy CRCs match.".into(),
-                        "The excerpt does not supply a whole-log checker score.".into(),
-                    ],
-                    optional_points: vec![],
-                    contradictions: vec!["Track quality 100.0% guarantees a 100% whole-log checker score.".into()],
                 },
             },
             QuestionDto {
