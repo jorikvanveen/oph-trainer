@@ -680,13 +680,27 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "dupes-same-quality".into(),
                 topic_id: "dupes".into(),
-                prompt: "When is a torrent a dupe, and does a scene label make an otherwise identical torrent different?".into(),
-                reference_answer: "Same edition, format, bitrate and comparable sampling rate means a dupe. Scene versus non-scene does not make otherwise identical torrents distinct.".into(),
+                prompt: "When is a torrent considered a duplicate of an existing torrent?".into(),
+                reference_answer: "A torrent is a duplicate when it matches an existing torrent's edition, format and bitrate, with a comparable or identical sampling rate.".into(),
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Same edition and same quality/format/bitrate with comparable sampling rate is a dupe.".into(),
+                    ],
+                    optional_points: vec![],
+                    contradictions: vec![],
+                },
+            },
+            QuestionDto {
+                question_id: "dupes-scene-status".into(),
+                topic_id: "dupes".into(),
+                prompt: "Does a scene label affect whether a torrent is considered a duplicate?".into(),
+                reference_answer: "No. Scene and non-scene torrents are duplicates if they are otherwise identical.".into(),
+                source_url: DUPES.into(),
+                material: vec![],
+                grading: AnswerCriteria::Explanation {
+                    required_points: vec![
                         "Scene status alone does not avoid duplication.".into(),
                     ],
                     optional_points: vec![],
