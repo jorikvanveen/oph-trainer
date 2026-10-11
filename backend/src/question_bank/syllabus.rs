@@ -128,7 +128,18 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: FORMATS.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["WAV and AIFF are uncompressed lossless.".into(), "FLAC, ALAC and APE are compressed lossless.".into(), "MP3, AAC, WMA, AC3 and DTS are lossy.".into()],
+                    required_points: vec![
+                        "WAV is uncompressed lossless.".into(),
+                        "AIFF is uncompressed lossless.".into(),
+                        "FLAC is compressed lossless.".into(),
+                        "ALAC is compressed lossless.".into(),
+                        "APE is compressed lossless.".into(),
+                        "MP3 is lossy.".into(),
+                        "AAC is lossy.".into(),
+                        "WMA is lossy.".into(),
+                        "AC3 is lossy.".into(),
+                        "DTS is lossy.".into(),
+                    ],
                     optional_points: vec!["PCM means pulse-code modulation.".into()],
                     contradictions: vec!["FLAC is lossy.".into()],
                 },
@@ -179,7 +190,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: FORMATS.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["MP3, AAC, AC3 and DTS are allowed.".into()],
+                    required_points: vec![
+                        "MP3 is allowed.".into(),
+                        "AAC is allowed.".into(),
+                        "AC3 is allowed.".into(),
+                        "DTS is allowed.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["WMA is an allowed upload format.".into()],
                 },
@@ -726,7 +742,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Title, album, artist and track number are required.".into()],
+                    required_points: vec![
+                        "The title tag is required.".into(),
+                        "The album tag is required.".into(),
+                        "The artist tag is required.".into(),
+                        "The track number tag is required.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1373,7 +1394,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Commercial gain, referral schemes, solicitations and money offers are prohibited.".into()],
+                    required_points: vec![
+                        "Commercial gain is prohibited.".into(),
+                        "Referral schemes are prohibited.".into(),
+                        "Solicitations are prohibited.".into(),
+                        "Money offers are prohibited.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
