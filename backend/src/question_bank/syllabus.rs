@@ -1167,7 +1167,11 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Use only unmodified whitelisted clients with direct exclusive access.".into()],
+                    required_points: vec![
+                        "The client must be whitelisted.".into(),
+                        "The client must be unmodified.".into(),
+                        "You must have direct, exclusive access to the client.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["A modified approved client is automatically approved.".into()],
                 },
