@@ -81,6 +81,7 @@
 <svelte:head>
   <title>{title}</title>
   {#if page.url.pathname === '/'}
+    <link rel="canonical" href="https://oph-trainer.jorik-dev.com/" />
     <meta
       name="description"
       content="Prepare for the Orpheus admission interview with syllabus-based quizzes, answer feedback and saved progress. Unofficial and not affiliated with Orpheus."
