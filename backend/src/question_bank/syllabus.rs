@@ -49,7 +49,12 @@ pub(super) fn bank() -> QuestionBank {
                 material: vec![],
                 grading: AnswerCriteria::ShortAnswer {
                     accepted_answers: vec!["Analog-to-digital converter".into()],
-                    aliases: vec!["ADC".into(), "Analog to digital converter".into(), "A sound card".into(), "Sound card".into()],
+                    aliases: vec![
+                        "ADC".into(),
+                        "Analog to digital converter".into(),
+                        "A sound card".into(),
+                        "Sound card".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -65,7 +70,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Vinyl stores physical grooves.".into(),
                     ],
                     optional_points: vec![],
-                    contradictions: vec!["Vinyl already stores computer-readable digital files.".into()],
+                    contradictions: vec![
+                        "Vinyl already stores computer-readable digital files.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -76,7 +83,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: SOURCES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Playback is captured through an analog-to-digital recording device.".into(), "Vinyl playback uses a preamp.".into()],
+                    required_points: vec![
+                        "Playback is captured through an analog-to-digital recording device.".into(),
+                        "Vinyl playback uses a preamp.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -89,9 +99,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: SOURCES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Vinyl is approved.".into(), "Cassette and other analog media require moderator approval.".into()],
+                    required_points: vec![
+                        "Vinyl is approved.".into(),
+                        "Cassette and other analog media require moderator approval.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["All analog sources can be uploaded without approval.".into()],
+                    contradictions: vec![
+                        "All analog sources can be uploaded without approval.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -102,7 +117,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: SOURCES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Digital media already store computer-readable data.".into(), "Give two of CD, DVD, SACD or WEB download.".into()],
+                    required_points: vec![
+                        "Digital media already store computer-readable data.".into(),
+                        "Give two of CD, DVD, SACD or WEB download.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -115,9 +133,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: SOURCES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Check for lossy transcodes with spectral analysis.".into()],
+                    required_points: vec![
+                        "Check for lossy transcodes with spectral analysis.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["A digital source guarantees that its audio is lossless.".into()],
+                    contradictions: vec![
+                        "A digital source guarantees that its audio is lossless.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -164,9 +186,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: FORMATS.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Bitrate measures bits conveyed per unit of time, so 320 kbps means 320 kilobits per second.".into()],
+                    required_points: vec![
+                        "Bitrate measures bits conveyed per unit of time, so 320 kbps means 320 kilobits per second.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Bitrate measures audio frequency or song duration.".into()],
+                    contradictions: vec![
+                        "Bitrate measures audio frequency or song duration.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -177,9 +203,15 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: FORMATS.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Uncompressed lossless uses the same bits per second for silence and sound.".into(), "Compressed lossless represents the same audio more compactly, such as using very few bits for silence.".into(), "Lossy encoding saves space by discarding part of the recorded data.".into()],
+                    required_points: vec![
+                        "Uncompressed lossless uses the same bits per second for silence and sound.".into(),
+                        "Compressed lossless represents the same audio more compactly, such as using very few bits for silence.".into(),
+                        "Lossy encoding saves space by discarding part of the recorded data.".into(),
+                    ],
                     optional_points: vec!["Lossy removal often affects higher frequencies.".into()],
-                    contradictions: vec!["Smaller always means worse quality, including lossless compression.".into()],
+                    contradictions: vec![
+                        "Smaller always means worse quality, including lossless compression.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -209,7 +241,12 @@ pub(super) fn bank() -> QuestionBank {
                 material: vec![],
                 grading: AnswerCriteria::ShortAnswer {
                     accepted_answers: vec!["192 kbps".into()],
-                    aliases: vec!["192".into(), "192kbps".into(), "192 kbit/s".into(), "192 kilobits per second".into()],
+                    aliases: vec![
+                        "192".into(),
+                        "192kbps".into(),
+                        "192 kbit/s".into(),
+                        "192 kilobits per second".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -249,7 +286,9 @@ pub(super) fn bank() -> QuestionBank {
                         "V2 targets about 190 kbps.".into(),
                     ],
                     optional_points: vec![],
-                    contradictions: vec!["Every V0 encode has exactly 245 kbps average bitrate.".into()],
+                    contradictions: vec![
+                        "Every V0 encode has exactly 245 kbps average bitrate.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -279,8 +318,12 @@ pub(super) fn bank() -> QuestionBank {
                         "VBR targets quality.".into(),
                         "ABR's compromise performs neither approach well.".into(),
                     ],
-                    optional_points: vec!["ABR's target average makes file size predictable.".into()],
-                    contradictions: vec!["ABR and VBR both guarantee the selected average bitrate.".into()],
+                    optional_points: vec![
+                        "ABR's target average makes file size predictable.".into(),
+                    ],
+                    contradictions: vec![
+                        "ABR and VBR both guarantee the selected average bitrate.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -291,9 +334,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TRANSCODES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["WAV to FLAC to MP3 is good; lossy conversion occurs only at the last step.".into(), "WAV to MP3 to AAC is bad because AAC is made from a lossy source.".into()],
+                    required_points: vec![
+                        "WAV to FLAC to MP3 is good; lossy conversion occurs only at the last step.".into(),
+                        "WAV to MP3 to AAC is bad because AAC is made from a lossy source.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Changing the lossy output format makes another lossy conversion acceptable.".into()],
+                    contradictions: vec![
+                        "Changing the lossy output format makes another lossy conversion acceptable.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -316,7 +364,11 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["1.0 means equal uploaded and downloaded data.".into(), "Far below means contributing less than you take.".into(), "Far above can mean hoarding upload rather than downloading.".into()],
+                    required_points: vec![
+                        "1.0 means equal uploaded and downloaded data.".into(),
+                        "Far below means contributing less than you take.".into(),
+                        "Far above can mean hoarding upload rather than downloading.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["A high ratio automatically breaks a golden rule.".into()],
                 },
@@ -335,8 +387,12 @@ pub(super) fn bank() -> QuestionBank {
                         "Leeching downloads data.".into(),
                         "Seeding offers data to peers.".into(),
                     ],
-                    optional_points: vec!["A peer can upload completed pieces while downloading other pieces.".into()],
-                    contradictions: vec!["Seeding cannot begin until every piece is downloaded.".into()],
+                    optional_points: vec![
+                        "A peer can upload completed pieces while downloading other pieces.".into(),
+                    ],
+                    contradictions: vec![
+                        "Seeding cannot begin until every piece is downloaded.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -347,7 +403,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Upload credit requires actual data transfer to another peer.".into()],
+                    required_points: vec![
+                        "Upload credit requires actual data transfer to another peer.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Time spent seeding alone earns upload bytes.".into()],
                 },
@@ -360,7 +418,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The required ratio is zero until total downloads exceed 20 GB.".into()],
+                    required_points: vec![
+                        "The required ratio is zero until total downloads exceed 20 GB.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -373,7 +433,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Continue seeding as long as possible; 72 hours is not a stopping point.".into()],
+                    required_points: vec![
+                        "Continue seeding as long as possible; 72 hours is not a stopping point.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -386,9 +448,15 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Ratio watch gives two weeks to recover before downloads are disabled.".into(), "Over 10 GB downloaded on watch disables downloads immediately.".into(), "Recover by seeding, filling requests or uploading rule-compliant new torrents.".into()],
+                    required_points: vec![
+                        "Ratio watch gives two weeks to recover before downloads are disabled.".into(),
+                        "Over 10 GB downloaded on watch disables downloads immediately.".into(),
+                        "Recover by seeding, filling requests or uploading rule-compliant new torrents.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Duplicates or bad transcodes are acceptable to repair ratio.".into()],
+                    contradictions: vec![
+                        "Duplicates or bad transcodes are acceptable to repair ratio.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -417,9 +485,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Port forwarding routes incoming peer connections through NAT to the computer running the client, increasing opportunities to upload.".into()],
+                    required_points: vec![
+                        "Port forwarding routes incoming peer connections through NAT to the computer running the client, increasing opportunities to upload.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Port forwarding guarantees upload credit without data transfer.".into()],
+                    contradictions: vec![
+                        "Port forwarding guarantees upload credit without data transfer.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -430,7 +502,11 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Disable DHT.".into(), "Mark uploaded torrents private.".into(), "These settings exclude discovery of nonmember peers outside the tracker.".into()],
+                    required_points: vec![
+                        "Disable DHT.".into(),
+                        "Mark uploaded torrents private.".into(),
+                        "These settings exclude discovery of nonmember peers outside the tracker.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Enable DHT to share Orpheus torrents publicly.".into()],
                 },
@@ -443,9 +519,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Partial seeders appear as leechers because they hold only part of the torrent, but they do not intend to download the rest.".into()],
+                    required_points: vec![
+                        "Partial seeders appear as leechers because they hold only part of the torrent, but they do not intend to download the rest.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Every listed leecher intends to download the whole torrent.".into()],
+                    contradictions: vec![
+                        "Every listed leecher intends to download the whole torrent.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -456,9 +536,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["x is a wildcard for any number in that position.".into()],
+                    required_points: vec![
+                        "x is a wildcard for any number in that position.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Approval of one version means all future versions are approved.".into()],
+                    contradictions: vec![
+                        "Approval of one version means all future versions are approved.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -469,7 +553,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: TORRENTING.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Only approved client versions can connect to Orpheus peers.".into()],
+                    required_points: vec![
+                        "Only approved client versions can connect to Orpheus peers.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -499,7 +585,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Burning writes music files to a CD.".into(),
                     ],
                     optional_points: vec![],
-                    contradictions: vec!["Burning a lossy file restores the original recording.".into()],
+                    contradictions: vec![
+                        "Burning a lossy file restores the original recording.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -535,7 +623,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: CD.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["A log records the ripping process and any errors.".into()],
+                    required_points: vec![
+                        "A log records the ripping process and any errors.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -548,7 +638,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: CD.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["A cue supplies the CD layout information needed to recreate the original CD.".into()],
+                    required_points: vec![
+                        "A cue supplies the CD layout information needed to recreate the original CD.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["A cue contains the audio samples themselves.".into()],
                 },
@@ -579,7 +671,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Identify tracklist or running order as concrete evidence to compare. Stating only that the audio must differ does not cover this evidence requirement.".into(),
                         "Identify at least one ripping-log detail such as TOC, peak levels or pre-gaps as concrete evidence to compare. Stating only that the audio must differ does not cover this evidence requirement.".into(),
                     ],
-                    optional_points: vec!["Bonus tracks may establish different audio content.".into()],
+                    optional_points: vec![
+                        "Bonus tracks may establish different audio content.".into(),
+                    ],
                     contradictions: vec!["Every different pressing is allowed to coexist.".into()],
                 },
             },
@@ -591,7 +685,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Same edition and same quality/format/bitrate with comparable sampling rate is a dupe.".into(), "Scene status alone does not avoid duplication.".into()],
+                    required_points: vec![
+                        "Same edition and same quality/format/bitrate with comparable sampling rate is a dupe.".into(),
+                        "Scene status alone does not avoid duplication.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Scene and non-scene copies always coexist.".into()],
                 },
@@ -604,9 +701,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["A torrent unseeded for two weeks can be trumped.".into(), "Reseed its original torrent if you have the files.".into()],
+                    required_points: vec![
+                        "A torrent unseeded for two weeks can be trumped.".into(),
+                        "Reseed its original torrent if you have the files.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["A briefly unseeded torrent automatically permits a duplicate upload.".into()],
+                    contradictions: vec![
+                        "A briefly unseeded torrent automatically permits a duplicate upload.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -634,7 +736,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["MP3 320 CBR and V0 may coexist, provided neither duplicates an existing rip in its bitrate and format.".into()],
+                    required_points: vec![
+                        "MP3 320 CBR and V0 may coexist, provided neither duplicates an existing rip in its bitrate and format.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["V0 always trumps 320 CBR.".into()],
                 },
@@ -664,9 +768,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Allowed MP3 trumps equivalent AAC except the iTunes Exclusive tracks exception.".into()],
+                    required_points: vec![
+                        "Allowed MP3 trumps equivalent AAC except the iTunes Exclusive tracks exception.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["AAC with iTunes Exclusive tracks can always be trumped by MP3.".into()],
+                    contradictions: vec![
+                        "AAC with iTunes Exclusive tracks can always be trumped by MP3.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -677,7 +785,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Extra files do not trump equivalent lossy audio.".into()],
+                    required_points: vec![
+                        "Extra files do not trump equivalent lossy audio.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Adding a cue always permits a lossy trump.".into()],
                 },
@@ -690,9 +800,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["A CD-R copy of a pressed CD is not an allowed source.".into(), "Artist/label releases distributed only on CD-R are an exception.".into()],
+                    required_points: vec![
+                        "A CD-R copy of a pressed CD is not an allowed source.".into(),
+                        "Artist/label releases distributed only on CD-R are an exception.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Burning and re-ripping a pressed CD is an equivalent approved source.".into()],
+                    contradictions: vec![
+                        "Burning and re-ripping a pressed CD is an equivalent approved source.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -703,8 +818,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["An approved-tool log can trump no log.".into(), "A 100% log can trump an 80% log.".into(), "A 99% log cannot trump an 80% approved-tool log.".into()],
-                    optional_points: vec!["An approved-tool log can also trump a nonapproved-tool log.".into()],
+                    required_points: vec![
+                        "An approved-tool log can trump no log.".into(),
+                        "A 100% log can trump an 80% log.".into(),
+                        "A 99% log cannot trump an 80% approved-tool log.".into(),
+                    ],
+                    optional_points: vec![
+                        "An approved-tool log can also trump a nonapproved-tool log.".into(),
+                    ],
                     contradictions: vec!["Any higher log score can trump a lower one.".into()],
                 },
             },
@@ -716,8 +837,12 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The cue must materially differ from one generated from the log.".into()],
-                    optional_points: vec!["Material differences can include extra indices, detected pre-gaps or pre-emphasis flags.".into()],
+                    required_points: vec![
+                        "The cue must materially differ from one generated from the log.".into(),
+                    ],
+                    optional_points: vec![
+                        "Material differences can include extra indices, detected pre-gaps or pre-emphasis flags.".into(),
+                    ],
                     contradictions: vec!["Adding any generated cue is enough to trump.".into()],
                 },
             },
@@ -729,7 +854,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["A tag trump requires substantial correction, not tiny spelling or diacritic changes.".into()],
+                    required_points: vec![
+                        "A tag trump requires substantial correction, not tiny spelling or diacritic changes.".into(),
+                    ],
                     optional_points: vec!["Album titles must use proper capitalization.".into()],
                     contradictions: vec!["Any typo permits a tag trump.".into()],
                 },
@@ -767,7 +894,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Filenames must reflect track titles.".into(),
                         "Do not put repeated track numbers from multiple discs in one directory.".into(),
                     ],
-                    optional_points: vec!["Year and format in the folder name are encouraged.".into()],
+                    optional_points: vec![
+                        "Year and format in the folder name are encouraged.".into(),
+                    ],
                     contradictions: vec!["A ZIP archive is an acceptable music folder.".into()],
                 },
             },
@@ -801,7 +930,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram A with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The visible content extends to about 22 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The visible content extends to about 22 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -817,7 +948,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram A with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The content reaches about 22 kHz, above the typical upper hearing limit of about 20 kHz.".into()],
+                    required_points: vec![
+                        "The content reaches about 22 kHz, above the typical upper hearing limit of about 20 kHz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -830,7 +963,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: SPECTRALS.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Lossless-to-lossless conversion preserves the audio data and spectrum.".into()],
+                    required_points: vec![
+                        "Lossless-to-lossless conversion preserves the audio data and spectrum.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec!["Lossless conversion removes high-frequency data.".into()],
                 },
@@ -846,9 +981,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Classical piano spectral diagram from the Orpheus interview guide, with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["No. Piano music can naturally contain little high-frequency musical energy, so musical sparsity alone does not establish a lossy transcode.".into()],
+                    required_points: vec![
+                        "No. Piano music can naturally contain little high-frequency musical energy, so musical sparsity alone does not establish a lossy transcode.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["All lossless music must have strong energy across every frequency.".into()],
+                    contradictions: vec![
+                        "All lossless music must have strong energy across every frequency.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -862,7 +1001,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram K of the supplied piano recording, with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Faint background noise extending to about 22 kHz supports a lossless source.".into()],
+                    required_points: vec![
+                        "Faint background noise extending to about 22 kHz supports a lossless source.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -878,9 +1019,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram L of the supplied piano excerpt after the stated conversion, with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Converting MP3 to FLAC cannot recover audio data discarded by the MP3 encode.".into()],
+                    required_points: vec![
+                        "Converting MP3 to FLAC cannot recover audio data discarded by the MP3 encode.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Converting MP3 to FLAC restores the removed frequencies.".into()],
+                    contradictions: vec![
+                        "Converting MP3 to FLAC restores the removed frequencies.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -894,7 +1039,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram C with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The tallest purple spikes reach around 20 kHz. Accept rough estimates within 19.5 to 20.5 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The tallest purple spikes reach around 20 kHz. Accept rough estimates within 19.5 to 20.5 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -902,7 +1049,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-320-comparison".into(),
                 topic_id: "spectral".into(),
-                prompt: "Are the purple spike tips below, near, or above the guide's MP3 320 kbps CBR cutoff?".into(),
+                prompt: "Are the purple spike tips below, near, or above the guide's MP3 320 kbps CBR cutoff? State the guide's cutoff in kHz as part of your answer.".into(),
                 reference_answer: "The spike tips are near the 20.5 kHz reference, or slightly below it. The spikes reach about 20 kHz; the guide's cutoff is 20.5 kHz.".into(),
                 source_url: SPECTRALS.into(),
                 material: vec![ExerciseMaterialDto::Image {
@@ -910,8 +1057,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram C with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The spike tips are near the 20.5 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate is not required.".into()],
-                    optional_points: vec!["The tallest purple spikes reach around 20 kHz. Accept rough estimates within 19.5 to 20.5 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "Explicitly state the guide's MP3 320 kbps CBR cutoff of 20.5 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
+                        "The spike tips are near the 20.5 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                    ],
+                    optional_points: vec![
+                        "The tallest purple spikes reach around 20 kHz. Accept rough estimates within 19.5 to 20.5 kHz, including equivalent values in Hz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -926,7 +1078,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram D with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The tallest purple spikes reach around 19.5 kHz. Accept rough estimates within 19 to 20 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The tallest purple spikes reach around 19.5 kHz. Accept rough estimates within 19 to 20 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -934,7 +1088,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-256-comparison".into(),
                 topic_id: "spectral".into(),
-                prompt: "Are the purple spike tips below, near, or above the guide's MP3 256 kbps CBR cutoff?".into(),
+                prompt: "Are the purple spike tips below, near, or above the guide's MP3 256 kbps CBR cutoff? State the guide's cutoff in kHz as part of your answer.".into(),
                 reference_answer: "The spike tips are near the 20 kHz reference, or slightly below it. The spikes reach about 19.5 kHz; the guide's cutoff is 20 kHz.".into(),
                 source_url: SPECTRALS.into(),
                 material: vec![ExerciseMaterialDto::Image {
@@ -942,8 +1096,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram D with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The spike tips are near the 20 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate is not required.".into()],
-                    optional_points: vec!["The tallest purple spikes reach around 19.5 kHz. Accept rough estimates within 19 to 20 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "Explicitly state the guide's MP3 256 kbps CBR cutoff of 20 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
+                        "The spike tips are near the 20 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                    ],
+                    optional_points: vec![
+                        "The tallest purple spikes reach around 19.5 kHz. Accept rough estimates within 19 to 20 kHz, including equivalent values in Hz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -958,7 +1117,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram F with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -966,7 +1127,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-192-comparison".into(),
                 topic_id: "spectral".into(),
-                prompt: "Are the purple spike tips below, near, or above the guide's MP3 192 kbps CBR cutoff?".into(),
+                prompt: "Are the purple spike tips below, near, or above the guide's MP3 192 kbps CBR cutoff? State the guide's cutoff in kHz as part of your answer.".into(),
                 reference_answer: "The spike tips are near the 19 kHz reference, or slightly below it. The spikes reach about 18.5 to 19 kHz; the guide's cutoff is 19 kHz.".into(),
                 source_url: SPECTRALS.into(),
                 material: vec![ExerciseMaterialDto::Image {
@@ -974,8 +1135,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram F with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The spike tips are near the 19 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate is not required.".into()],
-                    optional_points: vec!["The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "Explicitly state the guide's MP3 192 kbps CBR cutoff of 19 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
+                        "The spike tips are near the 19 kHz reference, or slightly below it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                    ],
+                    optional_points: vec![
+                        "The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -990,7 +1156,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram G with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -998,7 +1166,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-v2-comparison".into(),
                 topic_id: "spectral".into(),
-                prompt: "Are the purple spike tips below, near, or above the guide's MP3 V2 cutoff?".into(),
+                prompt: "Are the purple spike tips below, near, or above the guide's MP3 V2 cutoff? State the guide's cutoff in kHz as part of your answer.".into(),
                 reference_answer: "The spike tips are near the 18.5 kHz reference, or slightly above it. The spikes reach about 18.5 to 19 kHz; the guide's cutoff is 18.5 kHz.".into(),
                 source_url: SPECTRALS.into(),
                 material: vec![ExerciseMaterialDto::Image {
@@ -1006,8 +1174,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram G with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The spike tips are near the 18.5 kHz reference, or slightly above it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate is not required.".into()],
-                    optional_points: vec!["The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "Explicitly state the guide's MP3 V2 cutoff of 18.5 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
+                        "The spike tips are near the 18.5 kHz reference, or slightly above it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                    ],
+                    optional_points: vec![
+                        "The tallest purple spikes reach around 18.5 to 19 kHz. Accept rough estimates within 18 to 19.5 kHz, including equivalent values in Hz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -1022,7 +1195,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram H with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The tallest purple spikes reach around 16 to 17 kHz. Accept rough estimates within 16 to 17 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The tallest purple spikes reach around 16 to 17 kHz. Accept rough estimates within 16 to 17 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1030,7 +1205,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-128-comparison".into(),
                 topic_id: "spectral".into(),
-                prompt: "Are the purple spike tips below, near, or above the guide's MP3 128 kbps CBR cutoff?".into(),
+                prompt: "Are the purple spike tips below, near, or above the guide's MP3 128 kbps CBR cutoff? State the guide's cutoff in kHz as part of your answer.".into(),
                 reference_answer: "The spike tips are near the 16 kHz reference, or slightly above it. The spikes reach about 16 to 17 kHz; the guide's cutoff is 16 kHz.".into(),
                 source_url: SPECTRALS.into(),
                 material: vec![ExerciseMaterialDto::Image {
@@ -1038,8 +1213,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram H with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The spike tips are near the 16 kHz reference, or slightly above it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate is not required.".into()],
-                    optional_points: vec!["The tallest purple spikes reach around 16 to 17 kHz. Accept rough estimates within 16 to 17 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "Explicitly state the guide's MP3 128 kbps CBR cutoff of 16 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
+                        "The spike tips are near the 16 kHz reference, or slightly above it. Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate of the spike height is not required.".into(),
+                    ],
+                    optional_points: vec![
+                        "The tallest purple spikes reach around 16 to 17 kHz. Accept rough estimates within 16 to 17 kHz, including equivalent values in Hz.".into(),
+                    ],
                     contradictions: vec![],
                 },
             },
@@ -1054,7 +1234,9 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram E with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The purple streaks reach approximately 21 to 22 kHz, including equivalent values in Hz.".into()],
+                    required_points: vec![
+                        "The purple streaks reach approximately 21 to 22 kHz, including equivalent values in Hz.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1062,7 +1244,7 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-v0-comparison".into(),
                 topic_id: "spectral".into(),
-                prompt: "Are the purple streak tips below, near, or above the guide's MP3 V0 cutoff?".into(),
+                prompt: "Are the purple streak tips below, near, or above the guide's MP3 V0 cutoff? State the guide's cutoff in kHz as part of your answer.".into(),
                 reference_answer: "Above. The purple streaks reach about 21 to 22 kHz, above the guide's 19.5 kHz cutoff.".into(),
                 source_url: SPECTRALS.into(),
                 material: vec![ExerciseMaterialDto::Image {
@@ -1070,8 +1252,11 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram E with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The purple streak tips extend above the guide's MP3 V0 cutoff. A numerical estimate is not required.".into()],
-                    optional_points: vec!["The purple streaks reach about 21 to 22 kHz; the guide's MP3 V0 cutoff is 19.5 kHz.".into()],
+                    required_points: vec![
+                        "Explicitly state the guide's MP3 V0 cutoff of 19.5 kHz, or its equivalent in Hz. A comparison alone is insufficient.".into(),
+                        "The purple streak tips extend above the guide's MP3 V0 cutoff. A numerical estimate of the streak height is not required.".into(),
+                    ],
+                    optional_points: vec!["The purple streaks reach about 21 to 22 kHz.".into()],
                     contradictions: vec![],
                 },
             },
@@ -1099,9 +1284,13 @@ pub(super) fn bank() -> QuestionBank {
                     description: "Spectral diagram I for the supplied file, with time and frequency axes.".into(),
                 }],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["The cutoff near 18.5 to 19 kHz suggests a lossy source despite the FLAC format.".into()],
+                    required_points: vec![
+                        "The cutoff near 18.5 to 19 kHz suggests a lossy source despite the FLAC format.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["A FLAC extension or large file size proves a lossless source.".into()],
+                    contradictions: vec![
+                        "A FLAC extension or large file size proves a lossless source.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1183,7 +1372,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Invitees' golden-rule breaches can endanger the inviter's privileges or account.".into(), "Invitees' ratio failure alone is not punished against the inviter.".into()],
+                    required_points: vec![
+                        "Invitees' golden-rule breaches can endanger the inviter's privileges or account.".into(),
+                        "Invitees' ratio failure alone is not punished against the inviter.".into(),
+                    ],
                     optional_points: vec!["Invite only people you know and trust.".into()],
                     contradictions: vec!["Inviters are never responsible for invitees.".into()],
                 },
@@ -1204,7 +1396,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Do not send unsolicited invite requests.".into(),
                         "Messaging in response to an Invites Forum offer is permitted.".into(),
                     ],
-                    optional_points: vec!["The Invites Forum is restricted to Elite and above.".into()],
+                    optional_points: vec![
+                        "The Invites Forum is restricted to Elite and above.".into(),
+                    ],
                     contradictions: vec!["Private unsolicited requests are allowed.".into()],
                 },
             },
@@ -1216,9 +1410,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Unintended buffer transfer/increase is ratio manipulation.".into(), "Reporting false data is cheating even with an approved client.".into()],
+                    required_points: vec![
+                        "Unintended buffer transfer/increase is ratio manipulation.".into(),
+                        "Reporting false data is cheating even with an approved client.".into(),
+                    ],
                     optional_points: vec!["Ask staff about uncertainty.".into()],
-                    contradictions: vec!["An approved client makes manipulated reports acceptable.".into()],
+                    contradictions: vec![
+                        "An approved client makes manipulated reports acceptable.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1235,7 +1434,9 @@ pub(super) fn bank() -> QuestionBank {
                         "You must have direct, exclusive access to the client.".into(),
                     ],
                     optional_points: vec![],
-                    contradictions: vec!["A modified approved client is automatically approved.".into()],
+                    contradictions: vec![
+                        "A modified approved client is automatically approved.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1246,7 +1447,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Unstable-client testing requires prior staff approval.".into()],
+                    required_points: vec![
+                        "Unstable-client testing requires prior staff approval.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1259,9 +1462,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Sharing torrent files exposes your personal passkey.".into()],
+                    required_points: vec![
+                        "Sharing torrent files exposes your personal passkey.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["The torrent file is safe to share if your password is withheld.".into()],
+                    contradictions: vec![
+                        "The torrent file is safe to share if your password is withheld.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1272,7 +1479,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Adding outside announce URLs can cause false tracker reporting interpreted as cheating.".into()],
+                    required_points: vec![
+                        "Adding outside announce URLs can cause false tracker reporting interpreted as cheating.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1292,7 +1501,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Privacy protection also covers information found by investigating public details.".into(),
                     ],
                     optional_points: vec![],
-                    contradictions: vec!["Information found through a search may always be published.".into()],
+                    contradictions: vec![
+                        "Information found through a search may always be published.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1303,9 +1514,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Report suspected breaches rather than backseat moderating.".into()],
+                    required_points: vec![
+                        "Report suspected breaches rather than backseat moderating.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Confronting a suspected rule breaker is the preferred response.".into()],
+                    contradictions: vec![
+                        "Confronting a suspected rule breaker is the preferred response.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1329,7 +1544,9 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["No staff/service impersonation on-site, off-site or IRC.".into()],
+                    required_points: vec![
+                        "No staff/service impersonation on-site, off-site or IRC.".into(),
+                    ],
                     optional_points: vec![],
                     contradictions: vec![],
                 },
@@ -1348,7 +1565,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Do not shop around moderators for a favorable answer.".into(),
                         "An administrator may give a second opinion.".into(),
                     ],
-                    optional_points: vec!["Respect staff and their final rule interpretation.".into()],
+                    optional_points: vec![
+                        "Respect staff and their final rule interpretation.".into(),
+                    ],
                     contradictions: vec!["User consensus overrides staff's interpretation.".into()],
                 },
             },
@@ -1361,7 +1580,9 @@ pub(super) fn bank() -> QuestionBank {
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec!["Users cannot request special events.".into()],
-                    optional_points: vec!["Special events are staff's decision and follow no fixed schedule.".into()],
+                    optional_points: vec![
+                        "Special events are staff's decision and follow no fixed schedule.".into(),
+                    ],
                     contradictions: vec!["Freeleech must happen on a fixed schedule.".into()],
                 },
             },
@@ -1391,7 +1612,10 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Use only paid, self-hosted or seedbox VPN/proxy services; free services are prohibited.".into(), "Tor browsing is prohibited.".into()],
+                    required_points: vec![
+                        "Use only paid, self-hosted or seedbox VPN/proxy services; free services are prohibited.".into(),
+                        "Tor browsing is prohibited.".into(),
+                    ],
                     optional_points: vec!["Ask staff when uncertain.".into()],
                     contradictions: vec!["Any free VPN is allowed.".into()],
                 },
@@ -1404,9 +1628,14 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Automated access uses the API, not HTML scraping.".into(), "At most five requests within any ten-second window.".into()],
+                    required_points: vec![
+                        "Automated access uses the API, not HTML scraping.".into(),
+                        "At most five requests within any ten-second window.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Staying under the rate limit permits HTML scraping.".into()],
+                    contradictions: vec![
+                        "Staying under the rate limit permits HTML scraping.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1417,9 +1646,13 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["No freeleech autosnatching with little or no user input.".into()],
+                    required_points: vec![
+                        "No freeleech autosnatching with little or no user input.".into(),
+                    ],
                     optional_points: vec![],
-                    contradictions: vec!["Using the API within its rate limit permits freeleech autosnatching.".into()],
+                    contradictions: vec![
+                        "Using the API within its rate limit permits freeleech autosnatching.".into(),
+                    ],
                 },
             },
             QuestionDto {
@@ -1437,7 +1670,9 @@ pub(super) fn bank() -> QuestionBank {
                         "Do not publish, share or facilitate exploits.".into(),
                     ],
                     optional_points: vec!["Staff decide exploit classifications.".into()],
-                    contradictions: vec!["Testing a live vulnerability is allowed before reporting it.".into()],
+                    contradictions: vec![
+                        "Testing a live vulnerability is allowed before reporting it.".into(),
+                    ],
                 },
             },
         ],

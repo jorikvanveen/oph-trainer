@@ -2,6 +2,8 @@
 
 Prefer the scripts in `scripts/` for common development tasks.
 
+Run direct Cargo check, build, test, and DTO export commands with `backend/` as the working directory, for example `cargo test --workspace`. Cargo discovers `.cargo/config.toml` from the working directory, not the `--manifest-path` location. Running tests from the repository root skips `backend/.cargo/config.toml` and makes ts-rs write generated files to `backend/bindings/` instead of `frontend/src/lib/dto/`.
+
 The flake devshell is already loaded into the agent's environment. Run scripts and tool commands directly; do not wrap them in `nix develop`.
 
 Before running the app, checking or building changes, exporting DTOs, or managing migrations, read `scripts/README.md` for the available commands and usage.
