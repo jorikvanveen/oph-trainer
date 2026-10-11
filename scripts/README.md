@@ -42,6 +42,21 @@ To build and serve the app without Vite:
 
 The backend serves the app at `http://127.0.0.1:3000` by default. The development and start scripts leave environment configuration unchanged, including `OPH_BIND_ADDRESS`, `OPH_DATABASE_URL`, `OPH_STATIC_DIR`, `OPH_OPENROUTER_API_KEY`, `OPH_USE_X_FORWARDED_FOR`, and `RUST_LOG`. Relative backend paths resolve from `backend/`. For a trusted reverse proxy, `OPH_USE_X_FORWARDED_FOR=true` selects the first IP in `X-Forwarded-For` for grading rate limits; it defaults to `false`. See [proxy requirements and grading settings](../docs/grading.md).
 
+## Nix package
+
+On x86_64 Linux, build the backend with its static frontend bundled, or run it directly:
+
+```sh
+nix build .#oph-trainer
+nix run .
+```
+
+The default package is `oph-trainer`. The wrapper sets `OPH_STATIC_DIR` to the bundled frontend unless you provide a value. Other environment settings retain their usual defaults. The default SQLite database is created in the process's working directory, which must be writable, or you can set `OPH_DATABASE_URL` to a persistent location.
+
+For a homelab flake, add `inputs.oph-trainer.url = "github:jorikvanveen/oph-trainer"` and use `inputs.oph-trainer.packages.${pkgs.stdenv.hostPlatform.system}.default`. Its executable is `bin/oph-trainer-backend`. Set the service's working directory or database URL to its writable state directory, and configure the bind address for your reverse proxy.
+
+Build only the static frontend with `nix build .#oph-trainer-frontend`. Cargo and npm dependencies come from the committed lockfiles, so dependency updates do not require separate Nix dependency hashes.
+
 ### Logging
 
 The backend logs startup stages, question-bank counts, account creation, quiz selection, answer assessment, saved quizzes and progress resets. Each API request has a process-local request ID, method, registered route, response status and elapsed milliseconds. Messages from the same request include its request context. Successful requests log at `info`, HTTP 4xx responses at `warn`, and HTTP 5xx responses at `error`. Static-file requests are excluded to keep page loads quiet. Request timing ends when the response is ready, before its body is sent.
