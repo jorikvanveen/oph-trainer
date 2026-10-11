@@ -352,11 +352,9 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-lossless",
         "spectral",
         SPECTRALS,
-        "Human hearing spans approximately 20 Hz to 20 kHz. How high does the signal in this diagram extend compared with that hearing range?",
-        "The signal extends to about 22 kHz, above the approximate 20 kHz upper limit of human hearing.",
-        &[
-            "The signal extends to about 22 kHz, above the approximate 20 kHz upper limit of human hearing.",
-        ],
+        "How high does the visible content extend, in kHz?",
+        "The visible content extends to about 22 kHz.",
+        &["The visible content extends to about 22 kHz, including equivalent values in Hz."],
         &[],
         &[],
     );
@@ -365,6 +363,23 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "Spectral diagram A with time and frequency axes.",
     ));
     bank.questions.push(full);
+    let mut hearing = explain(
+        "spectral-hearing-range",
+        "spectral",
+        SPECTRALS,
+        "Does this recording contain frequencies above the typical human hearing range? Explain using the diagram.",
+        "Yes. The content reaches about 22 kHz, above the typical upper hearing limit of about 20 kHz.",
+        &[
+            "The content reaches about 22 kHz, above the typical upper hearing limit of about 20 kHz.",
+        ],
+        &[],
+        &[],
+    );
+    hearing.material.push(spectral(
+        "spectrum-a.png",
+        "Spectral diagram A with time and frequency axes.",
+    ));
+    bank.questions.push(hearing);
     bank.questions.push(explain(
         "spectral-lossless-conversion", "spectral", SPECTRALS,
         "Would converting lossless audio between FLAC, WAV and ALAC change its spectrum? Explain why.",
@@ -376,11 +391,10 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-classical",
         "spectral",
         SPECTRALS,
-        "Why can this sparse piano spectrum still represent lossless audio? What reaches about 22 kHz?",
-        "Piano music can naturally contain little high-frequency musical energy. Faint background noise still reaches about 22 kHz, so the sparse musical spectrum is consistent with lossless audio.",
+        "Does this piano recording's musical spectrum establish a lossy transcode? Explain.",
+        "No. Piano music can naturally contain little high-frequency musical energy, so a sparse musical spectrum alone does not establish a lossy transcode.",
         &[
-            "Piano music can naturally contain little high-frequency musical energy.",
-            "Sparsity alone does not establish a lossy transcode; faint noise reaching about 22 kHz shows that high-frequency content is still present.",
+            "No. Piano music can naturally contain little high-frequency musical energy, so musical sparsity alone does not establish a lossy transcode.",
         ],
         &[],
         &["All lossless music must have strong energy across every frequency."],
@@ -394,14 +408,11 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-piano-noise",
         "spectral",
         SPECTRALS,
-        "How high does the faint background noise extend, in kHz? Why can this sparse piano spectrum still be consistent with lossless audio?",
-        "The faint background noise extends to about 22 kHz. Piano music can naturally have little high-frequency musical energy, so sparsity alone does not indicate a lossy transcode.",
-        &[
-            "Piano music can naturally have little high-frequency musical energy; sparsity alone does not establish a lossy transcode.",
-            "The faint background noise extends to about 22 kHz.",
-        ],
+        "Which feature of this piano spectrum supports a lossless source?",
+        "Faint background noise extends to about 22 kHz, showing that high-frequency content is still present.",
+        &["Faint background noise extending to about 22 kHz supports a lossless source."],
         &[],
-        &["A sparse musical spectrum alone establishes a lossy transcode."],
+        &[],
     );
     piano_noise.material.push(spectral(
         "spectrum-k.png",
@@ -412,9 +423,9 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "spectral-piano-transcode",
         "spectral",
         SPECTRALS,
-        "This piano excerpt was converted from MP3 128 kbps to FLAC. Does that restore frequencies removed above the cutoff near 16 kHz? Explain why.",
-        "No. MP3 encoding discarded those frequencies. Converting to FLAC cannot recover the discarded audio data.",
-        &["Converting MP3 to FLAC cannot restore frequencies discarded by the MP3 encode."],
+        "This piano recording was converted from MP3 to FLAC. Does that recover discarded audio data? Explain.",
+        "No. MP3 encoding discarded audio data that conversion to FLAC cannot recover.",
+        &["Converting MP3 to FLAC cannot recover audio data discarded by the MP3 encode."],
         &[],
         &["Converting MP3 to FLAC restores the removed frequencies."],
     );
@@ -476,22 +487,17 @@ fn spectral_questions(bank: &mut QuestionBank) {
         ),
     ] {
         let observation = format!(
-            "The tallest purple spikes reach around {cutoff}. Accept rough estimates within {accepted_range}, including equivalent values in Hz. The continuous band near 16 kHz is a different feature."
-        );
-        let comparison_criterion = format!(
-            "{comparison} Accept 'near' or the stated slight difference. A claim that the spikes are far below or far above the reference does not cover this point."
+            "The tallest purple spikes reach around {cutoff}. Accept rough estimates within {accepted_range}, including equivalent values in Hz."
         );
         let mut question = explain(
             id,
             "spectral",
             SPECTRALS,
+            "How high do the tallest purple spikes reach, in kHz?",
             &format!(
-                "How high do the tallest purple spikes reach, in kHz? Is that below, near, or above the {guide_cutoff} {encoding} reference cutoff?"
+                "The tallest purple spikes reach about {cutoff}. The continuous band ends near 16 kHz."
             ),
-            &format!(
-                "The tallest purple spikes reach about {cutoff}. {comparison} The continuous band ends near 16 kHz."
-            ),
-            &[&observation, &comparison_criterion],
+            &[&observation],
             &[],
             &[],
         );
@@ -500,18 +506,39 @@ fn spectral_questions(bank: &mut QuestionBank) {
             &format!("Spectral diagram {label} with time and frequency axes."),
         ));
         bank.questions.push(question);
+        let comparison_criterion = format!(
+            "{comparison} Accept 'near' or the stated slight difference, including 'below' or 'above' paired with an accurate frequency estimate. A claim that the spikes are far below or far above the reference does not cover this point. A numerical estimate is not required."
+        );
+        let mut comparison_question = explain(
+            &format!("{id}-comparison"),
+            "spectral",
+            SPECTRALS,
+            &format!(
+                "Are the purple spike tips below, near, or above the guide's {encoding} cutoff?"
+            ),
+            &format!(
+                "{comparison} The spikes reach about {cutoff}; the guide's cutoff is {guide_cutoff}."
+            ),
+            &[&comparison_criterion],
+            &[&observation],
+            &[],
+        );
+        comparison_question.material.push(spectral(
+            file,
+            &format!("Spectral diagram {label} with time and frequency axes."),
+        ));
+        bank.questions.push(comparison_question);
     }
     let mut v0 = explain(
         "spectral-v0",
         "spectral",
         SPECTRALS,
-        "How high do the faint purple streaks extend, in kHz? Are they below, near, or above the guide's 19.5 kHz MP3 V0 reference cutoff?",
-        "The faint purple streaks reach about 21 to 22 kHz, above the guide's 19.5 kHz reference. Most of the prominent content is below about 19 to 20 kHz.",
+        "How high do the purple streaks extend, in kHz?",
+        "The purple streaks reach about 21 to 22 kHz.",
         &[
-            "The weaker purple streaks reach approximately 21 to 22 kHz, including equivalent values in Hz.",
-            "The weaker streaks extend above the 19.5 kHz reference cutoff.",
+            "The purple streaks reach approximately 21 to 22 kHz, including equivalent values in Hz.",
         ],
-        &["Most of the prominent purple/red content is below about 19 to 20 kHz."],
+        &[],
         &[],
     );
     v0.material.push(spectral(
@@ -519,6 +546,23 @@ fn spectral_questions(bank: &mut QuestionBank) {
         "Spectral diagram E with time and frequency axes.",
     ));
     bank.questions.push(v0);
+    let mut v0_comparison = explain(
+        "spectral-v0-comparison",
+        "spectral",
+        SPECTRALS,
+        "Are the purple streak tips below, near, or above the guide's MP3 V0 cutoff?",
+        "Above. The purple streaks reach about 21 to 22 kHz, above the guide's 19.5 kHz cutoff.",
+        &[
+            "The purple streak tips extend above the guide's MP3 V0 cutoff. A numerical estimate is not required.",
+        ],
+        &["The purple streaks reach about 21 to 22 kHz; the guide's MP3 V0 cutoff is 19.5 kHz."],
+        &[],
+    );
+    v0_comparison.material.push(spectral(
+        "spectrum-e.png",
+        "Spectral diagram E with time and frequency axes.",
+    ));
+    bank.questions.push(v0_comparison);
     bank.questions.push(explain(
         "spectral-mp3-shelf",
         "spectral",
