@@ -1,8 +1,8 @@
-use std::sync::Arc;
+use std::{net::SocketAddr, sync::Arc};
 
 use axum::{
-    Json, Router,
-    extract::State,
+    Extension, Json, Router,
+    extract::{ConnectInfo, DefaultBodyLimit, State},
     http::{HeaderMap, StatusCode, header},
     response::{IntoResponse, Response},
     routing::{get, post},
@@ -14,26 +14,51 @@ use crate::{
         AccountDto, AnswerFeedbackDto, AnswerSubmissionDto, ApiErrorCodeDto, ApiErrorDto,
         CommitQuizDto, ProgressDto, QuestionCatalogDto, QuizSelectionRequestDto, SampleDto,
     },
+    grading::{ANSWER_CHARS, GradingService, REQUEST_BYTES},
     practice::PracticeService,
 };
 
 struct ApiState {
     practice: PracticeService,
     accounts: AccountService,
+    grading: GradingService,
+    use_x_forwarded_for: bool,
 }
 
 pub fn api(practice: PracticeService, accounts: AccountService) -> Router {
+    api_with_grading(
+        practice,
+        accounts,
+        GradingService::new(None).expect("grading HTTP client"),
+        false,
+    )
+}
+
+pub fn api_with_grading(
+    practice: PracticeService,
+    accounts: AccountService,
+    grading: GradingService,
+    use_x_forwarded_for: bool,
+) -> Router {
     Router::new()
         .route("/sample", get(sample))
         .route("/catalog", get(catalog))
         .route("/quizzes", post(select_quiz))
-        .route("/answers", post(answer))
+        .route(
+            "/answers",
+            post(answer).layer(DefaultBodyLimit::max(REQUEST_BYTES)),
+        )
         .route("/accounts", post(create_account))
         .route("/progress", get(progress).delete(reset_progress))
         .route("/progress/quizzes", post(commit_quiz))
         .fallback(|| async { StatusCode::NOT_FOUND })
         .layer(axum::middleware::map_response(disable_caching))
-        .with_state(Arc::new(ApiState { practice, accounts }))
+        .with_state(Arc::new(ApiState {
+            practice,
+            accounts,
+            grading,
+            use_x_forwarded_for,
+        }))
 }
 
 async fn disable_caching(mut response: Response) -> Response {
@@ -79,9 +104,49 @@ async fn select_quiz(
 
 async fn answer(
     State(state): State<Arc<ApiState>>,
+    peer: Option<Extension<ConnectInfo<SocketAddr>>>,
+    headers: HeaderMap,
     Json(submission): Json<AnswerSubmissionDto>,
 ) -> Result<Json<AnswerFeedbackDto>, ApiError> {
-    Ok(Json(state.practice.grade_answer(submission)?))
+    if submission.answer.chars().count() > ANSWER_CHARS {
+        return Err(ApiErrorDto {
+            code: ApiErrorCodeDto::InvalidAnswer,
+            message: "Answer is too long. Shorten it or use self-assessment.".into(),
+        }
+        .into());
+    }
+    let mut feedback = state.practice.grade_answer(submission.clone())?;
+    if feedback.status == crate::dto::FeedbackStatusDto::NeedsSelfAssessment {
+        let socket_ip = peer.map(|peer| peer.0.0.ip());
+        let client_ip = if state.use_x_forwarded_for {
+            headers
+                .get("x-forwarded-for")
+                .and_then(|value| value.to_str().ok())
+                .and_then(|value| value.split(',').next()?.trim().parse().ok())
+                .or(socket_ip)
+        } else {
+            socket_ip
+        };
+        let question = state
+            .practice
+            .question(&submission.question_id)
+            .expect("validated question");
+        if let Some(assessment) = state
+            .grading
+            .grade(question, &submission.answer, client_ip)
+            .await
+        {
+            feedback.status = if assessment.required_points.iter().all(|point| point.covered)
+                && assessment.contradictions.is_empty()
+            {
+                crate::dto::FeedbackStatusDto::Correct
+            } else {
+                crate::dto::FeedbackStatusDto::Incorrect
+            };
+            feedback.explanation_feedback = Some(assessment);
+        }
+    }
+    Ok(Json(feedback))
 }
 
 async fn progress(

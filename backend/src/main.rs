@@ -1,7 +1,9 @@
+use std::net::SocketAddr;
+
 use axum::Router;
 use migration::{Migrator, MigratorTrait};
 use oph_trainer_backend::{
-    accounts::AccountService, config::Config, practice::PracticeService,
+    accounts::AccountService, config::Config, grading::GradingService, practice::PracticeService,
     question_bank::QuestionBank, routes,
 };
 use sea_orm::{ConnectOptions, Database};
@@ -18,21 +20,29 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         .init();
 
     let config = Config::load()?;
-    let practice = PracticeService::new(QuestionBank::questions());
+    let grading = GradingService::new(config.openrouter_api_key.clone())?;
     let mut options = ConnectOptions::new(config.database_url);
     options.sqlx_logging(false);
     options.record_stmt_in_spans(false);
     let db = Database::connect(options).await?;
     Migrator::up(&db, None).await?;
 
+    let api = routes::api_with_grading(
+        PracticeService::new(QuestionBank::questions()),
+        AccountService::new(db),
+        grading,
+        config.use_x_forwarded_for,
+    );
     // A service mount reserves both "/api" and "/api/" from the static fallback.
-    let api = routes::api(practice, AccountService::new(db));
     let app = Router::new()
         .nest_service("/api", api)
         .fallback_service(ServeDir::new(config.static_dir));
     let listener = TcpListener::bind(&config.bind_address).await?;
     tracing::info!(address = %listener.local_addr()?, "Listening");
-    axum::serve(listener, app).await?;
-
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await?;
     Ok(())
 }

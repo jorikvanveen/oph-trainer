@@ -211,6 +211,15 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
         name: /^(Next question|Finish quiz)/
       });
       await expect(next).toBeDisabled();
+      if (question.grading.type !== 'explanation')
+        throw new Error('Expected explanation');
+      const points = page
+        .getByRole('region', { name: 'Self-assessment details', exact: true })
+        .getByRole('listitem');
+      const labels = question.grading.required_points.map(
+        (point) => `Not graded ${point}`
+      );
+      await expect(points).toHaveText(labels);
       correct = explanations++ === 0;
       await page
         .getByRole('button', {
@@ -219,6 +228,7 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
         })
         .click();
       await expect(next).toBeEnabled();
+      await expect(points).toHaveText(labels);
     } else if (shortAnswers++ === 0) {
       expect(feedback.status).toBe('correct');
       await expect(page.getByText('Correct', { exact: true })).toBeVisible();

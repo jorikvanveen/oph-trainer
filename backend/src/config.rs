@@ -1,6 +1,8 @@
 use std::env;
 
 pub struct Config {
+    pub openrouter_api_key: Option<String>,
+    pub use_x_forwarded_for: bool,
     pub bind_address: String,
     pub database_url: String,
     pub static_dir: String,
@@ -9,6 +11,12 @@ pub struct Config {
 impl Config {
     pub fn load() -> Result<Self, Box<dyn std::error::Error + Send + Sync>> {
         Ok(Self {
+            openrouter_api_key: env::var("OPH_OPENROUTER_API_KEY")
+                .ok()
+                .filter(|key| !key.trim().is_empty()),
+            use_x_forwarded_for: env_or_default("OPH_USE_X_FORWARDED_FOR", "false")?
+                .parse()
+                .map_err(|_| "OPH_USE_X_FORWARDED_FOR must be true or false")?,
             bind_address: env_or_default("OPH_BIND_ADDRESS", "127.0.0.1:3000")?,
             database_url: env_or_default("OPH_DATABASE_URL", "sqlite://oph-trainer.db?mode=rwc")?,
             static_dir: env_or_default("OPH_STATIC_DIR", "../frontend/build")?,

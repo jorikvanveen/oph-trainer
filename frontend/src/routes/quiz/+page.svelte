@@ -19,6 +19,7 @@
   let answer = $state('');
   let feedback = $state<AnswerFeedbackDto | null>(null);
   let grade = $state<boolean | null>(null);
+  let assessmentAvailable = $state(false);
   let answerInput = $state<HTMLTextAreaElement>();
   const current = $derived(quiz?.questions[index]);
   const FeedbackIcon = $derived(
@@ -58,10 +59,23 @@
           ? null
           : feedback.status === 'correct';
     } catch (cause) {
+      assessmentAvailable = true;
       appState.error = `${errorMessage(cause)} Your answer is still ungraded. Retry when ready.`;
     } finally {
       appState.busy = false;
     }
+  }
+
+  function selfAssess() {
+    if (!current || appState.busy) return;
+    feedback = {
+      question_id: current.question_id,
+      status: 'needs_self_assessment',
+      reference_answer: current.reference_answer,
+      source_url: current.source_url
+    };
+    grade = null;
+    appState.error = '';
   }
 
   async function advance() {
@@ -73,6 +87,7 @@
     answer = '';
     feedback = null;
     grade = null;
+    assessmentAvailable = false;
     if (index === quiz.questions.length - 1) await goto('/quiz/summary/');
     else {
       index += 1;
@@ -145,6 +160,12 @@
     <h2>{current.prompt}</h2>
     <form onsubmit={submitAnswer}>
       <label class="answer-label" for="answer">Your answer</label>
+      {#if current.grading.type === 'explanation'}
+        <p class="grading-notice">
+          Automatic grading sends your answer and grading context to OpenRouter
+          and TypeSafe. It is free; no model key is needed.
+        </p>
+      {/if}
       <textarea
         id="answer"
         class="answer-input"
@@ -163,6 +184,16 @@
         }}></textarea>
       {#if !feedback}
         <div class="answer-actions">
+          {#if assessmentAvailable || current.grading.type === 'explanation'}
+            <button
+              type="button"
+              class="secondary"
+              disabled={appState.busy || !answer.trim()}
+              onclick={selfAssess}
+            >
+              Use self-assessment
+            </button>
+          {/if}
           <button type="submit" disabled={appState.busy || !answer.trim()}>
             {appState.busy
               ? 'Submitting...'
@@ -191,6 +222,51 @@
                   : 'Incorrect'}
             </strong>
           </div>
+          {#if current.grading.type === 'explanation'}
+            <section
+              class="assessment-details"
+              aria-label={feedback.explanation_feedback
+                ? 'Automatic assessment details'
+                : 'Self-assessment details'}
+            >
+              <h3>
+                {feedback.explanation_feedback
+                  ? 'Automatic assessment'
+                  : 'Self-assessment'}
+              </h3>
+              {#if feedback.status === 'incorrect' && grade === true}
+                <p>You marked this answer correct.</p>
+              {/if}
+              <h4>Required points</h4>
+              <ul class="required-points">
+                {#each feedback.explanation_feedback?.required_points ?? current.grading.required_points.map( (point) => ({ point, covered: null }) ) as assessment}
+                  <li>
+                    <span
+                      class="point-status"
+                      class:point-covered={assessment.covered === true}
+                      class:point-missed={assessment.covered === false}
+                    >
+                      {assessment.covered === null
+                        ? 'Not graded'
+                        : assessment.covered
+                          ? 'Covered'
+                          : 'Missed'}
+                    </span>
+                    <span>{assessment.point}</span>
+                  </li>
+                {/each}
+              </ul>
+              {#if feedback.explanation_feedback?.contradictions.length}
+                <h4>Contradictions detected</h4>
+                <p>The assessment found these false claims in your answer:</p>
+                <ul>
+                  {#each feedback.explanation_feedback.contradictions as contradiction}
+                    <li>{contradiction}</li>
+                  {/each}
+                </ul>
+              {/if}
+            </section>
+          {/if}
           <div class="reference-answer">
             <h3>Reference answer</h3>
             <p>{feedback.reference_answer}</p>
@@ -407,6 +483,13 @@
     margin: 22px 0 0;
   }
 
+  .grading-notice {
+    font-size: 12px;
+    color: #626d59;
+    line-height: 1.6;
+    margin: 0 0 12px;
+  }
+
   .answer-label {
     display: block;
     font-size: 12px;
@@ -489,6 +572,60 @@
   .feedback-pending {
     background: #edf2f5;
     color: #4d6975;
+  }
+
+  .assessment-details {
+    margin: 25px 0;
+    color: #626d59;
+    font-size: 14px;
+    line-height: 1.8;
+  }
+
+  .assessment-details h3,
+  .assessment-details h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #354437;
+    margin: 12px 0 8px;
+  }
+
+  .assessment-details p {
+    margin: 0 0 8px;
+  }
+
+  .assessment-details ul {
+    padding-left: 22px;
+    margin: 0;
+  }
+
+  .required-points {
+    list-style: none;
+  }
+
+  .assessment-details .required-points {
+    padding-left: 0;
+  }
+
+  .required-points li {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 8px 0;
+  }
+
+  .point-status {
+    flex: 0 0 70px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4d6975;
+  }
+
+  .point-covered {
+    color: #45603b;
+  }
+
+  .point-missed {
+    color: #815b3d;
   }
 
   .reference-answer {

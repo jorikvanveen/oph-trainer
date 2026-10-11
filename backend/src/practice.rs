@@ -108,6 +108,13 @@ impl PracticeService {
         })
     }
 
+    pub(crate) fn question(&self, id: &str) -> Option<&crate::dto::QuestionDto> {
+        self.bank
+            .questions
+            .iter()
+            .find(|question| question.question_id == id)
+    }
+
     pub fn grade_answer(
         &self,
         submission: AnswerSubmissionDto,
@@ -148,6 +155,7 @@ impl PracticeService {
             AnswerCriteria::Explanation { .. } => FeedbackStatusDto::NeedsSelfAssessment,
         };
         Ok(AnswerFeedbackDto {
+            explanation_feedback: None,
             question_id: question.question_id.clone(),
             status,
             reference_answer: question.reference_answer.clone(),

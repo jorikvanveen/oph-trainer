@@ -8,3 +8,4 @@ result
 /frontend/.svelte-kit/
 /frontend/build/
 /frontend/test-results/
+.env*

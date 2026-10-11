@@ -86,10 +86,29 @@ pub enum FeedbackStatusDto {
 #[serde(deny_unknown_fields)]
 #[ts(export)]
 pub struct AnswerFeedbackDto {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[ts(optional = nullable)]
+    pub explanation_feedback: Option<ExplanationFeedbackDto>,
     pub question_id: String,
     pub status: FeedbackStatusDto,
     pub reference_answer: String,
     pub source_url: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct ExplanationFeedbackDto {
+    pub required_points: Vec<RequiredPointFeedbackDto>,
+    pub contradictions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(deny_unknown_fields)]
+#[ts(export)]
+pub struct RequiredPointFeedbackDto {
+    pub point: String,
+    pub covered: bool,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
