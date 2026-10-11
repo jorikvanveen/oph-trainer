@@ -150,7 +150,7 @@ pub(super) fn bank() -> QuestionBank {
                 question_id: "transcodes-lossy-flac".into(),
                 topic_id: "transcodes".into(),
                 material: vec![],
-                prompt: "Why does converting an MP3 to FLAC not make it a lossless original?".into(),
+                prompt: "An MP3 file is converted to FLAC. How does this affect the audio data and quality?".into(),
                 reference_answer: "MP3 has already discarded audio data. FLAC cannot restore it. This lossy-to-lossless transcode is prohibited on Orpheus.".into(),
                 source_url: TRANSCODES_SOURCE.into(),
                 grading: AnswerCriteria::Explanation {
