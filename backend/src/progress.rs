@@ -1,29 +1,29 @@
 use std::collections::{BTreeMap, HashSet};
 
 use sea_orm::{
-    ColumnTrait, ConnectionTrait, DbErr, EntityTrait, QueryFilter, QueryOrder, Set,
+    ColumnTrait, ConnectionTrait, DbErr, EntityTrait, PaginatorTrait, QueryFilter, Set,
     TransactionTrait, TryInsertResult,
+    sea_query::{
+        Alias, Expr, ExprTrait, Func, JoinType, Order, OverStatement, Query, SelectStatement,
+        WindowStatement,
+    },
 };
 
 use crate::{
     accounts::{AccountService, database_error, error},
     dto::{
-        ApiErrorCodeDto, ApiErrorDto, CommitQuizDto, CompletedQuizDto, ProgressDto,
-        ProgressMetricsDto, QuestionCatalogDto, QuestionOutcomeDto,
+        ApiErrorCodeDto, ApiErrorDto, CommitQuizDto, ProgressDto, ProgressMetricsDto,
+        QuestionCatalogDto,
     },
     entity::{completed_quizzes as completed_quiz, question_outcomes as question_outcome},
 };
 
 impl AccountService {
-    pub async fn history(&self, account_key: &str) -> Result<Vec<CompletedQuizDto>, ApiErrorDto> {
-        load_history(self.database(), account_key).await
-    }
-
     pub async fn recent_outcomes(
         &self,
         account_key: &str,
     ) -> Result<BTreeMap<String, Vec<bool>>, ApiErrorDto> {
-        Ok(recent_outcomes(&self.history(account_key).await?))
+        load_recent_outcomes(self.database(), account_key).await
     }
 
     pub async fn progress(
@@ -31,37 +31,44 @@ impl AccountService {
         account_key: &str,
         catalog: &QuestionCatalogDto,
     ) -> Result<ProgressDto, ApiErrorDto> {
-        let history = self.history(account_key).await?;
-        let all: Vec<_> = history.iter().flat_map(|quiz| &quiz.outcomes).collect();
-        let overall = metrics(
-            catalog
+        let tx = self.database().begin().await.map_err(database_error)?;
+        let completed_quiz_count = completed_quiz::Entity::find()
+            .filter(completed_quiz::Column::AccountKey.eq(account_key))
+            .count(&tx)
+            .await
+            .map_err(database_error)? as usize;
+        let questions = catalog
+            .questions
+            .iter()
+            .map(|q| q.question_id.as_str())
+            .collect();
+        let overall = load_metrics(&tx, account_outcomes(account_key), questions).await?;
+        let mut by_topic = BTreeMap::new();
+        for topic in &catalog.topics {
+            let questions: HashSet<_> = catalog
                 .questions
                 .iter()
-                .map(|q| q.question_id.as_str())
-                .collect(),
-            &all,
-        );
-        let by_topic = catalog
-            .topics
-            .iter()
-            .map(|topic| {
-                let questions: HashSet<_> = catalog
-                    .questions
-                    .iter()
-                    .filter(|question| question.topic_id == topic.topic_id)
-                    .map(|question| question.question_id.as_str())
-                    .collect();
-                let outcomes: Vec<_> = all
-                    .iter()
-                    .copied()
-                    .filter(|outcome| questions.contains(outcome.question_id.as_str()))
-                    .collect();
-                (topic.topic_id.clone(), metrics(questions, &outcomes))
-            })
-            .collect();
+                .filter(|question| question.topic_id == topic.topic_id)
+                .map(|question| question.question_id.as_str())
+                .collect();
+            let mut query = account_outcomes(account_key);
+            query.and_where(
+                Expr::col((
+                    question_outcome::Entity,
+                    question_outcome::Column::QuestionId,
+                ))
+                .is_in(questions.iter().copied()),
+            );
+            by_topic.insert(
+                topic.topic_id.clone(),
+                load_metrics(&tx, query, questions).await?,
+            );
+        }
+        let recent_outcomes = load_recent_outcomes(&tx, account_key).await?;
+        tx.commit().await.map_err(database_error)?;
         Ok(ProgressDto {
-            recent_outcomes: recent_outcomes(&history),
-            history,
+            completed_quiz_count,
+            recent_outcomes,
             overall,
             by_topic,
         })
@@ -151,17 +158,11 @@ impl AccountService {
                     ));
                 }
                 let completion_id = inserted.last_insert_id;
-                let submitted: BTreeMap<_, _> = quiz
-                    .outcomes
-                    .into_iter()
-                    .map(|outcome| (outcome.question_id, outcome.correct))
-                    .collect();
-                for (position, question_id) in quiz.question_ids.into_iter().enumerate() {
+                for outcome in quiz.outcomes {
                     question_outcome::Entity::insert(question_outcome::ActiveModel {
                         completed_quiz_id: Set(completion_id),
-                        position: Set(position as i64),
-                        correct: Set(submitted[&question_id]),
-                        question_id: Set(question_id),
+                        correct: Set(outcome.correct),
+                        question_id: Set(outcome.question_id),
                     })
                     .exec(&tx)
                     .await
@@ -192,54 +193,132 @@ impl AccountService {
     }
 }
 
-async fn load_history(
+const RECENT_OUTCOME_LIMIT: u64 = 5;
+
+fn account_outcomes(account_key: &str) -> SelectStatement {
+    Query::select()
+        .from(question_outcome::Entity)
+        .join(
+            JoinType::InnerJoin,
+            completed_quiz::Entity,
+            Expr::col((
+                question_outcome::Entity,
+                question_outcome::Column::CompletedQuizId,
+            ))
+            .eq(Expr::col((
+                completed_quiz::Entity,
+                completed_quiz::Column::Id,
+            ))),
+        )
+        .and_where(completed_quiz::Column::AccountKey.eq(account_key))
+        .to_owned()
+}
+
+async fn load_recent_outcomes(
     db: &impl ConnectionTrait,
     account_key: &str,
-) -> Result<Vec<CompletedQuizDto>, ApiErrorDto> {
-    let quizzes = completed_quiz::Entity::find()
-        .filter(completed_quiz::Column::AccountKey.eq(account_key))
-        .find_with_related(question_outcome::Entity)
-        .order_by_asc(completed_quiz::Column::Id)
-        .order_by_asc(question_outcome::Column::Position)
-        .all(db)
-        .await
-        .map_err(database_error)?;
-    Ok(quizzes
-        .into_iter()
-        .map(|(quiz, outcomes)| CompletedQuizDto {
-            quiz_id: quiz.quiz_id,
-            outcomes: outcomes
-                .into_iter()
-                .map(|outcome| QuestionOutcomeDto {
-                    question_id: outcome.question_id,
-                    correct: outcome.correct,
-                })
-                .collect(),
-        })
-        .collect())
-}
-
-fn recent_outcomes(history: &[CompletedQuizDto]) -> BTreeMap<String, Vec<bool>> {
+) -> Result<BTreeMap<String, Vec<bool>>, ApiErrorDto> {
+    let mut ranked = account_outcomes(account_key);
+    ranked
+        .columns([
+            (
+                question_outcome::Entity,
+                question_outcome::Column::QuestionId,
+            ),
+            (question_outcome::Entity, question_outcome::Column::Correct),
+            (
+                question_outcome::Entity,
+                question_outcome::Column::CompletedQuizId,
+            ),
+        ])
+        .expr_window_as(
+            Func::cust(Alias::new("ROW_NUMBER")),
+            WindowStatement::new()
+                .partition_by((
+                    question_outcome::Entity,
+                    question_outcome::Column::QuestionId,
+                ))
+                .order_by(
+                    (
+                        question_outcome::Entity,
+                        question_outcome::Column::CompletedQuizId,
+                    ),
+                    Order::Desc,
+                )
+                .to_owned(),
+            Alias::new("outcome_rank"),
+        );
+    let query = Query::select()
+        .columns([
+            question_outcome::Column::QuestionId,
+            question_outcome::Column::Correct,
+        ])
+        .from_subquery(ranked, Alias::new("ranked_outcomes"))
+        .and_where(Expr::col(Alias::new("outcome_rank")).lte(RECENT_OUTCOME_LIMIT))
+        .order_by(question_outcome::Column::QuestionId, Order::Asc)
+        .order_by(question_outcome::Column::CompletedQuizId, Order::Asc)
+        .to_owned();
+    let rows = db.query_all(&query).await.map_err(database_error)?;
     let mut recent: BTreeMap<String, Vec<bool>> = BTreeMap::new();
-    for outcome in history.iter().flat_map(|quiz| &quiz.outcomes) {
-        let grades = recent.entry(outcome.question_id.clone()).or_default();
-        grades.push(outcome.correct);
-        if grades.len() > 5 {
-            grades.remove(0);
-        }
+    for row in rows {
+        let id = row.try_get("", "question_id").map_err(database_error)?;
+        let correct = row.try_get("", "correct").map_err(database_error)?;
+        recent.entry(id).or_default().push(correct);
     }
-    recent
+    Ok(recent)
 }
 
-fn metrics(questions: HashSet<&str>, outcomes: &[&QuestionOutcomeDto]) -> ProgressMetricsDto {
-    let covered = outcomes
-        .iter()
-        .map(|outcome| outcome.question_id.as_str())
-        .filter(|id| questions.contains(id))
-        .collect::<HashSet<_>>()
-        .len();
-    let correct = outcomes.iter().filter(|outcome| outcome.correct).count();
-    ProgressMetricsDto {
+async fn load_metrics(
+    db: &impl ConnectionTrait,
+    mut query: SelectStatement,
+    questions: HashSet<&str>,
+) -> Result<ProgressMetricsDto, ApiErrorDto> {
+    let question_id = Expr::col((
+        question_outcome::Entity,
+        question_outcome::Column::QuestionId,
+    ));
+    query
+        .expr_as(question_id.clone().count(), Alias::new("completed_answers"))
+        .expr_as(
+            Func::count(
+                Expr::case(
+                    Expr::col((question_outcome::Entity, question_outcome::Column::Correct))
+                        .eq(true),
+                    1,
+                )
+                .finally(Option::<i32>::None),
+            ),
+            Alias::new("correct_answers"),
+        )
+        .expr_as(
+            Func::count_distinct(
+                Expr::case(
+                    question_id.clone().is_in(questions.iter().copied()),
+                    question_id,
+                )
+                .finally(Option::<String>::None),
+            ),
+            Alias::new("covered_questions"),
+        );
+    let row = db
+        .query_one(&query)
+        .await
+        .map_err(database_error)?
+        .ok_or_else(|| {
+            database_error(DbErr::RecordNotFound(
+                "Progress aggregates were not returned.".into(),
+            ))
+        })?;
+    let completed = row
+        .try_get::<i64>("", "completed_answers")
+        .map_err(database_error)? as usize;
+    let correct = row
+        .try_get::<i64>("", "correct_answers")
+        .map_err(database_error)? as usize;
+    let covered = row
+        .try_get::<i64>("", "covered_questions")
+        .map_err(database_error)? as usize;
+    Ok(ProgressMetricsDto {
         available_questions: questions.len(),
         covered_questions: covered,
         coverage_percentage: if questions.is_empty() {
@@ -247,9 +326,8 @@ fn metrics(questions: HashSet<&str>, outcomes: &[&QuestionOutcomeDto]) -> Progre
         } else {
             covered as f64 * 100.0 / questions.len() as f64
         },
-        completed_answers: outcomes.len(),
+        completed_answers: completed,
         correct_answers: correct,
-        correct_percentage: (!outcomes.is_empty())
-            .then(|| correct as f64 * 100.0 / outcomes.len() as f64),
-    }
+        correct_percentage: (completed > 0).then(|| correct as f64 * 100.0 / completed as f64),
+    })
 }

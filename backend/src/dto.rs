@@ -132,14 +132,6 @@ pub struct QuestionOutcomeDto {
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
 #[serde(deny_unknown_fields)]
 #[ts(export)]
-pub struct CompletedQuizDto {
-    pub quiz_id: String,
-    pub outcomes: Vec<QuestionOutcomeDto>,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
-#[serde(deny_unknown_fields)]
-#[ts(export)]
 pub struct CommitQuizDto {
     pub quiz_id: String,
     pub question_ids: Vec<String>,
@@ -166,7 +158,7 @@ pub struct ProgressMetricsDto {
 #[derive(Debug, Clone, Serialize, TS)]
 #[ts(export)]
 pub struct ProgressDto {
-    pub history: Vec<CompletedQuizDto>,
+    pub completed_quiz_count: usize,
     pub recent_outcomes: BTreeMap<String, Vec<bool>>,
     pub overall: ProgressMetricsDto,
     pub by_topic: BTreeMap<String, ProgressMetricsDto>,

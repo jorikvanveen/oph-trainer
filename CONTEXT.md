@@ -56,6 +56,10 @@ _Avoid_: Score, partial credit
 An account's history of correct and incorrect outcomes for syllabus questions, used to describe what its learner has practiced and what they struggle with.
 _Avoid_: Answer archive, admission prediction
 
+**Recent outcomes**
+A question's most recent grades from completed quizzes, used to guide adaptive question selection.
+_Avoid_: Quiz history, all-time accuracy
+
 **Topic**
 A subject area within the syllabus that groups related questions.
 _Avoid_: Quiz

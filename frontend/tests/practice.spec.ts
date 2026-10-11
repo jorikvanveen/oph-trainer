@@ -127,6 +127,57 @@ async function submit(page: Page, answer: string): Promise<AnswerFeedbackDto> {
   return feedback;
 }
 
+test('progress shows all-time totals without a quiz history section after reload', async ({
+  page,
+  request
+}) => {
+  const created = await request.post('/api/accounts');
+  expect(created.status()).toBe(200);
+  const { account_key }: AccountDto = await created.json();
+  const catalog = await loadCatalog(request);
+  const questionIds = catalog.questions
+    .slice(0, 7)
+    .map((question) => question.question_id);
+  expect(questionIds).toHaveLength(7);
+  for (let index = 0; index < 7; index++) {
+    const committed = await request.post('/api/progress/quizzes', {
+      headers: { Authorization: `Bearer ${account_key}` },
+      data: {
+        quiz_id: `quiz-${6 - index}`,
+        question_ids: questionIds,
+        outcomes: questionIds.map((question_id, position) => ({
+          question_id,
+          correct: position < index
+        }))
+      }
+    });
+    expect(committed.status()).toBe(204);
+  }
+  const saved = await loadProgress(request, account_key);
+  expect(saved.completed_quiz_count).toBe(7);
+  await page.goto('/');
+  await useKey(page, account_key);
+  for (let visit = 0; visit < 2; visit++) {
+    await expect(
+      page.getByRole('group', { name: 'Completed answers', exact: true })
+    ).toContainText('49');
+    await expect(
+      page.getByRole('group', { name: 'Completed answers', exact: true })
+    ).toContainText('in 7 quizzes');
+    await expect(
+      page.getByRole('group', { name: 'Correct answers', exact: true })
+    ).toContainText('43%');
+    await expect(
+      page.getByRole('heading', { name: 'Recent quizzes', exact: true })
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole('group', { name: 'Completed quiz', exact: true })
+    ).toHaveCount(0);
+    if (visit === 0) await page.reload();
+  }
+  expect(await loadProgress(request, account_key)).toEqual(saved);
+});
+
 test('automatic account, immediate feedback, correction, self-assessment, completion and cross-device progress', async ({
   page,
   browser,
@@ -170,7 +221,7 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
   }
   const key = await keyFromUI(page);
   expect(key).toBe(account.account_key);
-  expect((await loadProgress(page.request, key)).history).toEqual([]);
+  expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(0);
   await page.getByRole('link', { name: 'Your progress', exact: true }).click();
   await expect(
     page.getByRole('group', { name: 'Completed answers', exact: true })
@@ -248,7 +299,9 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
       await expect(page.getByText('Correct', { exact: true })).toBeVisible();
     }
     expected.push({ question_id: question.question_id, correct });
-    expect((await loadProgress(page.request, key)).history).toEqual([]);
+    expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(
+      0
+    );
     await page
       .getByRole('button', { name: /^(Next question|Finish quiz)/ })
       .click();
@@ -262,12 +315,14 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
   await expect(page.getByRole('status')).toHaveText('Progress saved.');
   await expect(page).toHaveURL(/\/quiz\/summary\/$/);
   const saved = await loadProgress(page.request, key);
-  expect(saved.history).toEqual([
-    { quiz_id: quiz.quiz_id, outcomes: expected }
-  ]);
+  expect(saved.completed_quiz_count).toBe(1);
+  expect(saved.recent_outcomes).toEqual(
+    Object.fromEntries(
+      expected.map((outcome) => [outcome.question_id, [outcome.correct]])
+    )
+  );
   expect(saved.overall.completed_answers).toBe(expected.length);
   const accuracy = `${Math.round(saved.overall.correct_percentage!)}%`;
-  const historyGrade = `${expected.filter((outcome) => outcome.correct).length} / ${expected.length} correct`;
   const storage = await page.evaluate(() => ({
     local: { ...localStorage },
     session: { ...sessionStorage }
@@ -299,9 +354,6 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
   await expect(
     page.getByRole('group', { name: `${topic.name} progress`, exact: true })
   ).toContainText(`${expected.length} completed answers`);
-  await expect(
-    page.getByRole('group', { name: 'Completed quiz', exact: true })
-  ).toContainText(historyGrade);
   expect(creationsAfterReload).toEqual([]);
 
   const other = await browser.newContext({ baseURL });
@@ -312,9 +364,6 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
     await expect(
       second.getByRole('group', { name: 'Correct answers', exact: true })
     ).toContainText(accuracy);
-    await expect(
-      second.getByRole('group', { name: 'Completed quiz', exact: true })
-    ).toContainText(historyGrade);
     expect(await loadProgress(second.request, key)).toEqual(saved);
   } finally {
     await other.close();
@@ -349,7 +398,7 @@ test('general and multiple-topic selection, empty selection and abandoned batche
   await expect(
     page.getByRole('button', { name: 'Start quiz', exact: true })
   ).toBeEnabled();
-  expect((await loadProgress(page.request, key)).history).toEqual([]);
+  expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(0);
   await selectTopics(page, []);
   await expect(
     page.getByRole('button', { name: 'Start quiz', exact: true })
@@ -393,7 +442,7 @@ test('general and multiple-topic selection, empty selection and abandoned batche
   await expect(
     page.getByRole('heading', { name: 'Your progress', exact: true })
   ).toBeFocused();
-  expect((await loadProgress(page.request, key)).history).toEqual([]);
+  expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(0);
   await page.getByRole('link', { name: 'Practice', exact: true }).click();
   await start(page);
   await page.getByLabel('Your answer').fill('A draft discarded on navigation');
@@ -404,7 +453,7 @@ test('general and multiple-topic selection, empty selection and abandoned batche
     page.getByRole('button', { name: 'Start quiz', exact: true })
   ).toBeEnabled();
   await expect(page.getByLabel('Your answer')).toHaveCount(0);
-  expect((await loadProgress(page.request, key)).history).toEqual([]);
+  expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(0);
 });
 
 test('account switching isolates histories and an invalid key leaves the active quiz unchanged', async ({
@@ -494,7 +543,7 @@ test('confirmed reset retains the key and cancellation leaves history unchanged'
   await expect(
     page.getByText('No completed quizzes.', { exact: true })
   ).toBeVisible();
-  expect((await loadProgress(request, key)).history).toEqual([]);
+  expect((await loadProgress(request, key)).completed_quiz_count).toBe(0);
   await page.getByRole('button', { name: 'Account', exact: true }).click();
   await expect(
     page.getByLabel('Your account key', { exact: true })
@@ -554,20 +603,20 @@ test('network failures remain ungraded and an unconfirmed save can be retried', 
     .getByRole('button', { name: 'Keep practicing', exact: true })
     .click();
   await context.setOffline(false);
-  expect((await loadProgress(page.request, key)).history).toEqual([]);
+  expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(0);
   await page
     .getByRole('button', { name: 'Retry saving', exact: true })
     .dblclick();
   await expect(page.getByRole('status')).toHaveText('Progress saved.');
-  expect((await loadProgress(page.request, key)).history).toEqual([
-    {
-      quiz_id: quiz.quiz_id,
-      outcomes: quiz.questions.map((question) => ({
-        question_id: question.question_id,
-        correct: true
-      }))
-    }
-  ]);
+  const saved = await loadProgress(page.request, key);
+  expect(saved.completed_quiz_count).toBe(1);
+  expect(saved.overall.completed_answers).toBe(quiz.questions.length);
+  expect(saved.overall.correct_percentage).toBe(100);
+  expect(saved.recent_outcomes).toEqual(
+    Object.fromEntries(
+      quiz.questions.map((question) => [question.question_id, [true]])
+    )
+  );
   await context.setOffline(true);
   await page
     .getByRole('link', { name: 'View your progress', exact: true })
@@ -746,7 +795,7 @@ test('routes support direct visits and browser history without restoring abandon
     page.getByRole('button', { name: 'Start quiz', exact: true })
   ).toBeEnabled();
   await expect(page).toHaveURL(new URL('/', page.url()).href);
-  expect((await loadProgress(page.request, key)).history).toEqual([]);
+  expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(0);
 
   await page.goForward();
   await expect(page).toHaveURL(new URL('/', page.url()).href);
@@ -877,14 +926,21 @@ for (const topic of [
         .click();
       await expect(page.getByText('Correct', { exact: true })).toBeVisible();
       outcomes.push({ question_id: question.question_id, correct: true });
-      expect((await loadProgress(page.request, key)).history).toEqual([]);
+      expect((await loadProgress(page.request, key)).completed_quiz_count).toBe(
+        0
+      );
       await next.click();
     }
     if (topic.id === 'spectral') expect(images).toBeGreaterThan(0);
     else expect(cues).toBe(1);
     await expect(page.getByRole('status')).toHaveText('Progress saved.');
     const saved = await loadProgress(page.request, key);
-    expect(saved.history).toEqual([{ quiz_id: quiz.quiz_id, outcomes }]);
+    expect(saved.completed_quiz_count).toBe(1);
+    expect(saved.recent_outcomes).toEqual(
+      Object.fromEntries(
+        outcomes.map((outcome) => [outcome.question_id, [outcome.correct]])
+      )
+    );
     expect(saved.by_topic[topic.id].available_questions).toBe(pool.length);
     expect(saved.by_topic[topic.id].covered_questions).toBe(
       quiz.questions.length

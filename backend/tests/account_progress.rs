@@ -5,12 +5,17 @@ use axum::{
     body::{Body, to_bytes},
     http::{HeaderMap, Method, Request, StatusCode, header},
 };
-use migration::SchemaManager;
+use migration::{Migrator, MigratorTrait, SchemaManager};
 use oph_trainer_backend::{
-    accounts::AccountService, entity::question_outcomes as question_outcome,
-    practice::PracticeService, routes,
+    accounts::AccountService,
+    entity::{completed_quizzes as completed_quiz, question_outcomes as question_outcome},
+    practice::PracticeService,
+    routes,
 };
-use sea_orm::sea_query::Index;
+use sea_orm::{
+    ConnectionTrait, EntityTrait, Set,
+    sea_query::{Alias, Index, IntoIden, Query},
+};
 use serde_json::{Value, json};
 use tower::ServiceExt;
 
@@ -120,7 +125,8 @@ async fn practice_creates_an_account_key_and_abandoned_answers_leave_no_history(
     let selected = request(&app, Method::POST, "/quizzes", Some(key), json!({})).await;
     assert_eq!(selected.body["account_key"], Value::Null);
     let empty = progress(&app, key).await;
-    assert_eq!(empty["history"], json!([]));
+    assert_eq!(empty["completed_quiz_count"], 0);
+    assert_eq!(empty["recent_outcomes"], json!({}));
     assert_eq!(empty["overall"]["completed_answers"], 0);
     assert_eq!(empty["overall"]["coverage_percentage"], 0.0);
     assert_eq!(empty["overall"]["correct_percentage"], Value::Null);
@@ -141,26 +147,80 @@ async fn practice_creates_an_account_key_and_abandoned_answers_leave_no_history(
 }
 
 #[tokio::test]
-async fn account_key_restores_history_after_a_database_restart() {
+async fn account_key_restores_history_after_a_database_restart_and_display_data_migration() {
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.sqlite");
     let url = format!("sqlite://{}?mode=rwc", path.display());
-    let db = support::database(&url).await;
+    let db = support::connect(&url).await;
+    Migrator::up(&db, Some(2)).await.unwrap();
     let app = routes::api(
         PracticeService::new(support::bank(4)),
         AccountService::new(db.clone()),
     );
     let key = create_account(&app).await;
-    commit(&app, &key, quiz("first", &[("q0", false), ("q3", true)])).await;
+    let completion = completed_quiz::Entity::insert(completed_quiz::ActiveModel {
+        account_key: Set(key.clone()),
+        quiz_id: Set("first".into()),
+        ..Default::default()
+    })
+    .exec(&db)
+    .await
+    .unwrap();
+    db.execute(
+        &Query::insert()
+            .into_table(question_outcome::Entity)
+            .columns([
+                question_outcome::Column::CompletedQuizId.into_iden(),
+                Alias::new("position").into_iden(),
+                question_outcome::Column::QuestionId.into_iden(),
+                question_outcome::Column::Correct.into_iden(),
+            ])
+            .values_panic([
+                completion.last_insert_id.into(),
+                0.into(),
+                "q0".into(),
+                false.into(),
+            ])
+            .values_panic([
+                completion.last_insert_id.into(),
+                1.into(),
+                "q3".into(),
+                true.into(),
+            ])
+            .to_owned(),
+    )
+    .await
+    .unwrap();
     let saved = progress(&app, &key).await;
+    assert_eq!(saved["completed_quiz_count"], 1);
+    assert_eq!(saved["overall"]["completed_answers"], 2);
+    assert_eq!(saved["recent_outcomes"], json!({"q0":[false],"q3":[true]}));
     drop(app);
     db.close().await.unwrap();
     let reopened = support::database(&url).await;
     let app = routes::api(
         PracticeService::new(support::bank(4)),
-        AccountService::new(reopened),
+        AccountService::new(reopened.clone()),
     );
     assert_eq!(progress(&app, &key).await, saved);
+    commit(&app, &key, quiz("first", &[("q0", false), ("q3", true)])).await;
+    assert_eq!(progress(&app, &key).await, saved);
+    commit(&app, &key, quiz("second", &[("q0", true), ("q3", false)])).await;
+    let updated = progress(&app, &key).await;
+    assert_eq!(updated["completed_quiz_count"], 2);
+    assert_eq!(updated["overall"]["completed_answers"], 4);
+    assert_eq!(
+        updated["recent_outcomes"],
+        json!({"q0":[false,true],"q3":[true,false]})
+    );
+    Migrator::down(&reopened, Some(1)).await.unwrap();
+    Migrator::up(&reopened, None).await.unwrap();
+    assert_eq!(progress(&app, &key).await, updated);
+    let reset = request(&app, Method::DELETE, "/progress", Some(&key), Value::Null).await;
+    assert_eq!(reset.status, StatusCode::NO_CONTENT);
+    let empty = progress(&app, &key).await;
+    assert_eq!(empty["completed_quiz_count"], 0);
+    assert_eq!(empty["recent_outcomes"], json!({}));
 }
 
 #[tokio::test]
@@ -173,7 +233,7 @@ async fn account_keys_scope_history_and_reset_without_a_login_step() {
     commit(&app, &key_b, quiz("shared-id", &[("q3", false)])).await;
     let saved_a = progress(&app, &key_a).await;
     let saved_b = progress(&app, &key_b).await;
-    assert_ne!(saved_a["history"], saved_b["history"]);
+    assert_ne!(saved_a["recent_outcomes"], saved_b["recent_outcomes"]);
     for key in ["invalid".to_owned(), "0".repeat(64)] {
         let invalid = request(&app, Method::GET, "/progress", Some(&key), Value::Null).await;
         assert_eq!(invalid.status, StatusCode::UNAUTHORIZED);
@@ -181,9 +241,9 @@ async fn account_keys_scope_history_and_reset_without_a_login_step() {
     }
     let reset = request(&app, Method::DELETE, "/progress", Some(&key_b), Value::Null).await;
     assert_eq!(reset.status, StatusCode::NO_CONTENT);
-    assert_eq!(progress(&app, &key_b).await["history"], json!([]));
+    assert_eq!(progress(&app, &key_b).await["completed_quiz_count"], 0);
     assert_eq!(progress(&app, &key_a).await, saved_a);
-    assert_eq!(progress(&app, &key_b).await["history"], json!([]));
+    assert_eq!(progress(&app, &key_b).await["completed_quiz_count"], 0);
 }
 
 #[tokio::test]
@@ -297,8 +357,6 @@ async fn corrected_and_self_assessed_grades_count_once_and_metrics_follow_curren
     )
     .await;
     let saved = progress(&app, &account_key).await;
-    assert_eq!(saved["history"][0]["quiz_id"], "z-completed-first");
-    assert_eq!(saved["history"][1]["quiz_id"], "a-completed-second");
     assert_eq!(
         saved["overall"],
         json!({"available_questions":4,"covered_questions":3,"coverage_percentage":75.0,"completed_answers":4,"correct_answers":2,"correct_percentage":50.0})
@@ -322,7 +380,6 @@ async fn corrected_and_self_assessed_grades_count_once_and_metrics_follow_curren
         AccountService::new(db.clone()),
     );
     let metrics = progress(&updated, &account_key).await;
-    assert_eq!(metrics["history"], saved["history"]);
     assert_eq!(metrics["overall"]["completed_answers"], 4);
     assert_eq!(metrics["overall"]["coverage_percentage"], 100.0);
     assert_eq!(metrics["by_topic"]["audio"]["completed_answers"], 1);
@@ -341,7 +398,6 @@ async fn corrected_and_self_assessed_grades_count_once_and_metrics_follow_curren
         AccountService::new(db),
     );
     let metrics = progress(&empty, &account_key).await;
-    assert_eq!(metrics["history"], saved["history"]);
     assert_eq!(metrics["overall"]["coverage_percentage"], 0.0);
     assert_eq!(metrics["overall"]["correct_percentage"], 50.0);
     assert_eq!(metrics["by_topic"], json!({}));
@@ -365,7 +421,7 @@ async fn last_five_saved_outcomes_drive_selection_and_client_history_is_rejected
     let saved = progress(&app, &account_key).await;
     assert_eq!(saved["recent_outcomes"]["q0"], json!(vec![true; 5]));
     assert_eq!(saved["recent_outcomes"]["q1"], json!(vec![false; 5]));
-    assert_eq!(saved["history"].as_array().unwrap().len(), 7);
+    assert_eq!(saved["completed_quiz_count"], 7);
     let spoof = request(
         &app,
         Method::POST,
@@ -394,6 +450,129 @@ async fn last_five_saved_outcomes_drive_selection_and_client_history_is_rejected
     assert!(counts[0] > 0);
     assert!(counts[1] > counts[0] * 2, "{counts:?}");
     assert!(counts[2] > counts[0] * 2, "{counts:?}");
+}
+
+#[tokio::test]
+async fn sparse_outcomes_are_bounded_while_metrics_use_all_saved_history() {
+    let db = support::database("sqlite::memory:").await;
+    let accounts = AccountService::new(db.clone());
+    let app = routes::api(
+        PracticeService::new(support::bank(5)),
+        AccountService::new(db.clone()),
+    );
+    let key = create_account(&app).await;
+    let other_key = create_account(&app).await;
+    for index in 0..14 {
+        let mut outcomes = vec![("q3", index % 2 == 0), ("q1", false)];
+        if let Some(correct) = match index {
+            0 => Some(false),
+            1 | 3 | 6 | 8 => Some(true),
+            5 | 7 => Some(false),
+            _ => None,
+        } {
+            outcomes.push(("q0", correct));
+        }
+        if index == 0 {
+            outcomes.push(("q2", true));
+        }
+        // Quiz IDs deliberately sort in the opposite order from completion.
+        let id = format!("quiz-{:02}", 13 - index);
+        commit(&app, &key, quiz(&id, &outcomes)).await;
+        commit(&app, &other_key, quiz(&id, &[("q0", false), ("q4", true)])).await;
+    }
+    let saved = progress(&app, &key).await;
+    assert!(saved.get("history").is_none());
+    assert!(saved.get("recent_quizzes").is_none());
+    assert_eq!(saved["completed_quiz_count"], 14);
+    assert_eq!(
+        saved["recent_outcomes"],
+        json!({"q0":[true,false,true,false,true],"q1":[false,false,false,false,false],"q2":[true],"q3":[false,true,false,true,false]})
+    );
+    assert_eq!(saved["overall"]["completed_answers"], 36);
+    assert_eq!(saved["overall"]["correct_answers"], 12);
+    assert_eq!(saved["overall"]["covered_questions"], 4);
+    assert_eq!(saved["overall"]["coverage_percentage"], 80.0);
+    assert_eq!(saved["by_topic"]["audio"]["completed_answers"], 22);
+    assert_eq!(saved["by_topic"]["audio"]["correct_answers"], 5);
+    assert_eq!(saved["by_topic"]["audio"]["coverage_percentage"], 100.0);
+    assert_eq!(saved["by_topic"]["transcodes"]["completed_answers"], 14);
+    assert_eq!(saved["by_topic"]["transcodes"]["correct_answers"], 7);
+    assert_eq!(saved["by_topic"]["transcodes"]["coverage_percentage"], 50.0);
+    let recent = accounts.recent_outcomes(&key).await.unwrap();
+    assert_eq!(
+        serde_json::to_value(recent).unwrap(),
+        saved["recent_outcomes"]
+    );
+    let other = progress(&app, &other_key).await;
+    assert_eq!(other["completed_quiz_count"], 14);
+    assert_eq!(other["overall"]["completed_answers"], 28);
+    assert_eq!(other["overall"]["correct_answers"], 14);
+    assert_eq!(
+        other["recent_outcomes"],
+        json!({"q0":vec![false;5],"q4":vec![true;5]})
+    );
+
+    let mut changed = support::bank(5);
+    changed
+        .questions
+        .retain(|question| question.question_id != "q2");
+    changed.questions[0].topic_id = "transcodes".into();
+    let updated = routes::api(PracticeService::new(changed), AccountService::new(db));
+    let updated_progress = progress(&updated, &key).await;
+    assert_eq!(
+        updated_progress["recent_outcomes"],
+        saved["recent_outcomes"]
+    );
+    assert_eq!(updated_progress["overall"]["completed_answers"], 36);
+    assert_eq!(updated_progress["overall"]["correct_answers"], 12);
+    assert_eq!(updated_progress["overall"]["coverage_percentage"], 75.0);
+    assert_eq!(
+        updated_progress["by_topic"]["audio"]["completed_answers"],
+        14
+    );
+    assert_eq!(
+        updated_progress["by_topic"]["transcodes"]["completed_answers"],
+        21
+    );
+
+    commit(
+        &updated,
+        &key,
+        quiz(
+            "quiz-13",
+            &[("q3", true), ("q1", false), ("q0", false), ("q2", true)],
+        ),
+    )
+    .await;
+    assert_eq!(progress(&updated, &key).await, updated_progress);
+    let conflict = request(
+        &updated,
+        Method::POST,
+        "/progress/quizzes",
+        Some(&key),
+        quiz(
+            "quiz-13",
+            &[("q3", false), ("q1", false), ("q0", false), ("q2", true)],
+        ),
+    )
+    .await;
+    assert_eq!(conflict.status, StatusCode::CONFLICT);
+    assert_eq!(progress(&updated, &key).await, updated_progress);
+    let reset = request(
+        &updated,
+        Method::DELETE,
+        "/progress",
+        Some(&key),
+        Value::Null,
+    )
+    .await;
+    assert_eq!(reset.status, StatusCode::NO_CONTENT);
+    let empty = progress(&updated, &key).await;
+    assert_eq!(empty["completed_quiz_count"], 0);
+    assert_eq!(empty["recent_outcomes"], json!({}));
+    assert_eq!(empty["overall"]["completed_answers"], 0);
+    assert_eq!(empty["overall"]["correct_percentage"], Value::Null);
+    assert_eq!(progress(&app, &other_key).await, other);
 }
 
 #[tokio::test]

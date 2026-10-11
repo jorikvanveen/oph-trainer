@@ -45,67 +45,119 @@
 
 <h1 class="sr-only" tabindex="-1">Your progress</h1>
 {#if overall}
-<div class="stats-strip">
-  <div class="stat" role="group" aria-label="Question coverage">
-    <span class="stat-label"><span class="stat-icon"><Layers size={14} focusable="false" /></span>Question coverage</span>
-    <div class="stat-number">{percent(overall.coverage_percentage)}
-      <span>{overall.covered_questions} of {overall.available_questions}</span>
+  <div class="stats-strip">
+    <div class="stat" role="group" aria-label="Question coverage">
+      <span class="stat-label">
+        <span class="stat-icon"><Layers size={14} focusable="false" /></span>
+        Question coverage
+      </span>
+      <div class="stat-number">
+        {percent(overall.coverage_percentage)}
+        <span>
+          {overall.covered_questions} of {overall.available_questions}
+        </span>
+      </div>
+    </div>
+    <div class="stat" role="group" aria-label="Completed answers">
+      <span class="stat-label">
+        <span class="stat-icon">
+          <CheckCheck size={14} focusable="false" />
+        </span>
+        Completed answers
+      </span>
+      <div class="stat-number">
+        {overall.completed_answers}
+        <span>
+          in {progress?.completed_quiz_count ?? 0}
+          {(progress?.completed_quiz_count ?? 0) === 1 ? 'quiz' : 'quizzes'}
+        </span>
+      </div>
+    </div>
+    <div class="stat" role="group" aria-label="Correct answers">
+      <span class="stat-label">
+        <span class="stat-icon"><Target size={14} focusable="false" /></span>
+        Correct answers
+      </span>
+      <div class="stat-number">
+        {percent(overall.correct_percentage)}
+        <span>of completed answers</span>
+      </div>
     </div>
   </div>
-  <div class="stat" role="group" aria-label="Completed answers">
-    <span class="stat-label"><span class="stat-icon"><CheckCheck size={14} focusable="false" /></span>Completed answers</span>
-    <div class="stat-number">{overall.completed_answers}<span>in {progress?.history.length ?? 0} {(progress?.history.length ?? 0) === 1 ? 'quiz' : 'quizzes'}</span></div>
-  </div>
-  <div class="stat" role="group" aria-label="Correct answers">
-    <span class="stat-label"><span class="stat-icon"><Target size={14} focusable="false" /></span>Correct answers</span>
-    <div class="stat-number">{percent(overall.correct_percentage)}<span>of completed answers</span></div>
-  </div>
-</div>
-{#if !progress?.history.length}
-  <div class="empty-progress card"><p>No completed quizzes.</p><button disabled={appState.busy || appState.selected.length === 0} onclick={startQuiz}>Start quiz<ArrowRight size={16} focusable="false" /></button></div>
-{/if}
-<h2 class="section-heading">By topic</h2>
-<div class="topic-table card">
-  {#each topics as topic}
-    {@const metrics = progress?.by_topic[topic.topic_id]}
-    {#if metrics}
-      <div class="topic-table-row" role="group" aria-label={`${topic.name} progress`}>
-        <TopicIcon topic={topic.topic_id} size={16} />
-        <div class="topic-table-title">
-          <strong>{topic.name}</strong>
-          <span>{metrics.covered_questions} of {metrics.available_questions} questions practiced · {metrics.completed_answers} completed answers</span>
+  {#if !progress?.completed_quiz_count}
+    <div class="empty-progress card">
+      <p>No completed quizzes.</p>
+      <button
+        disabled={appState.busy || appState.selected.length === 0}
+        onclick={startQuiz}
+      >
+        Start quiz<ArrowRight size={16} focusable="false" />
+      </button>
+    </div>
+  {/if}
+  <h2 class="section-heading">By topic</h2>
+  <div class="topic-table card">
+    {#each topics as topic}
+      {@const metrics = progress?.by_topic[topic.topic_id]}
+      {#if metrics}
+        <div
+          class="topic-table-row"
+          role="group"
+          aria-label={`${topic.name} progress`}
+        >
+          <TopicIcon topic={topic.topic_id} size={16} />
+          <div class="topic-table-title">
+            <strong>{topic.name}</strong>
+            <span>
+              {metrics.covered_questions} of {metrics.available_questions} questions
+              practiced · {metrics.completed_answers} completed answers
+            </span>
+          </div>
+          <progress
+            class="table-progress"
+            max="100"
+            value={metrics.coverage_percentage}
+            aria-label={`${topic.name} coverage`}
+          ></progress>
+          <span class="table-accuracy">
+            {percent(metrics.coverage_percentage)} covered
+            <br />
+            {percent(metrics.correct_percentage)} correct
+          </span>
         </div>
-        <progress class="table-progress" max="100" value={metrics.coverage_percentage} aria-label={`${topic.name} coverage`}></progress>
-        <span class="table-accuracy">{percent(metrics.coverage_percentage)} covered<br />{percent(metrics.correct_percentage)} correct</span>
-      </div>
-    {/if}
-  {/each}
-</div>
-{#if progress?.history.length}
-  <h2 class="section-heading">Recent quizzes</h2>
-  <div class="history-card card">
-    {#each progress.history.slice(-5).reverse() as completed (completed.quiz_id)}
-      <div class="history-row" role="group" aria-label="Completed quiz">
-        <span class="history-check"><CheckCheck size={16} focusable="false" /></span>
-        <div><strong>Completed quiz</strong><span>{completed.outcomes.length} questions</span></div>
-        <span class="history-grade">{completed.outcomes.filter((outcome) => outcome.correct).length} / {completed.outcomes.length} correct</span>
-      </div>
+      {/if}
     {/each}
   </div>
 {/if}
-{/if}
 {#if progress}
   <div class="progress-footer">
-    <button class="ghost" disabled={appState.busy || !progress?.history.length} onclick={() => { resetOpen = true; }}><Trash2 size={14} focusable="false" />Clear progress</button>
+    <button
+      class="ghost"
+      disabled={appState.busy || !progress?.completed_quiz_count}
+      onclick={() => {
+        resetOpen = true;
+      }}
+    >
+      <Trash2 size={14} focusable="false" />Clear progress
+    </button>
   </div>
 {/if}
 {#if resetOpen}
-  <Confirmation title="Clear progress?" description="This deletes all completed quizzes. Your account key stays the same. This cannot be undone." confirm="Clear progress" cancel="Keep my progress"
-    oncancel={() => { resetOpen = false; }} onconfirm={() => { void resetProgress(); }} />
+  <Confirmation
+    title="Clear progress?"
+    description="This deletes all completed quizzes. Your account key stays the same. This cannot be undone."
+    confirm="Clear progress"
+    cancel="Keep my progress"
+    oncancel={() => {
+      resetOpen = false;
+    }}
+    onconfirm={() => {
+      void resetProgress();
+    }}
+  />
 {/if}
 
 <style>
-
   .card {
     border: 1px solid #e3e6dd;
     border-radius: 18px;
@@ -162,7 +214,9 @@
     color: #6c716a;
   }
 
-  .stat-icon { color: #8b9b7e; }
+  .stat-icon {
+    color: #8b9b7e;
+  }
 
   .stat-number {
     font-size: 24px;
@@ -201,14 +255,16 @@
     gap: 16px;
   }
 
-  .empty-progress p { margin: 0; }
+  .empty-progress p {
+    margin: 0;
+  }
 
-  .topic-table, .history-card {
+  .topic-table {
     padding: 0 22px;
     margin-bottom: 28px;
   }
 
-  .topic-table-row, .history-row {
+  .topic-table-row {
     display: flex;
     align-items: center;
     gap: 13px;
@@ -216,7 +272,7 @@
     border-bottom: 1px solid #eff1ea;
   }
 
-  .topic-table-row:last-child, .history-row:last-child {
+  .topic-table-row:last-child {
     border-bottom: 0;
   }
 
@@ -225,13 +281,13 @@
     flex: 1;
   }
 
-  .topic-table-title strong, .history-row strong {
+  .topic-table-title strong {
     display: block;
     font-weight: 500;
     font-size: 12px;
   }
 
-  .topic-table-title span, .history-row div > span {
+  .topic-table-title span {
     display: block;
     font-size: 11px;
     color: #6c716a;
@@ -248,16 +304,6 @@
     font-size: 11px;
     color: #56634d;
     line-height: 1.7;
-  }
-
-  .history-check {
-    height: 32px; width: 32px; border-radius: 50%;
-    display: grid; place-items: center; background: #eef3e8; color: #80996d;
-  }
-
-  .history-grade {
-    margin-left: auto; border-radius: 999px; background: #eceee7;
-    color: #354437; font-size: 11px; padding: 2px 8px; white-space: nowrap;
   }
 
   @media (max-width: 900px) {
@@ -281,10 +327,19 @@
   }
 
   @media (max-width: 520px) {
-    .stats-strip { padding: 16px 0; }
-    .stat-icon { display: none; }
-    .empty-progress { padding: 16px; }
-    .empty-progress p, .empty-progress button { font-size: 11px; }
+    .stats-strip {
+      padding: 16px 0;
+    }
+    .stat-icon {
+      display: none;
+    }
+    .empty-progress {
+      padding: 16px;
+    }
+    .empty-progress p,
+    .empty-progress button {
+      font-size: 11px;
+    }
 
     .stat {
       padding: 0 12px;
@@ -304,7 +359,7 @@
       font-size: 9px;
     }
 
-    .topic-table, .history-card {
+    .topic-table {
       padding: 0 14px;
     }
 
@@ -317,7 +372,8 @@
       font-size: 11px;
     }
 
-    .topic-table-title span, .table-accuracy {
+    .topic-table-title span,
+    .table-accuracy {
       font-size: 10px;
     }
 
@@ -325,7 +381,6 @@
       width: 76px;
     }
   }
-
 
   button {
     border: 1px solid transparent;
@@ -373,9 +428,11 @@
     border: 0;
   }
 
-
-
-  .progress-footer button { color: #6c716a; font-size: 11px; min-height: 32px; }
+  .progress-footer button {
+    color: #6c716a;
+    font-size: 11px;
+    min-height: 32px;
+  }
 
   .progress-footer {
     display: flex;
@@ -383,7 +440,4 @@
     margin: 23px 0 0;
     font-size: 11px;
   }
-
-
-
 </style>

@@ -113,5 +113,11 @@ test('point feedback survives correction and only final outcomes are saved', asy
       headers: { Authorization: `Bearer ${key}` }
     })
   ).json();
-  expect(progress.history).toEqual([{ quiz_id: quiz.quiz_id, outcomes }]);
+  expect(progress.completed_quiz_count).toBe(1);
+  expect(progress.overall.completed_answers).toBe(outcomes.length);
+  expect(progress.recent_outcomes).toEqual(
+    Object.fromEntries(
+      outcomes.map((outcome) => [outcome.question_id, [outcome.correct]])
+    )
+  );
 });

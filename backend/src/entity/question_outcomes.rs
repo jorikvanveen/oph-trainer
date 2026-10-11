@@ -7,7 +7,6 @@ use sea_orm::entity::prelude::*;
 pub struct Model {
     #[sea_orm(primary_key, auto_increment = false)]
     pub completed_quiz_id: i64,
-    pub position: i64,
     #[sea_orm(primary_key, auto_increment = false, column_type = "Text")]
     pub question_id: String,
     pub correct: bool,

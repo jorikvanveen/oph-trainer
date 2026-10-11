@@ -178,7 +178,7 @@ async fn progress(
         .progress(&account_key, &state.practice.catalog())
         .await?;
     tracing::debug!(
-        completed_quizzes = progress.history.len(),
+        completed_quizzes = progress.completed_quiz_count,
         completed_answers = progress.overall.completed_answers,
         "Progress loaded"
     );
