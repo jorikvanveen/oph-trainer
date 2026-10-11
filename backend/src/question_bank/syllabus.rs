@@ -1360,8 +1360,8 @@ pub(super) fn bank() -> QuestionBank {
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
-                    required_points: vec!["Special events are staff's decision and cannot be requested.".into()],
-                    optional_points: vec![],
+                    required_points: vec!["Users cannot request special events.".into()],
+                    optional_points: vec!["Special events are staff's decision and follow no fixed schedule.".into()],
                     contradictions: vec!["Freeleech must happen on a fixed schedule.".into()],
                 },
             },

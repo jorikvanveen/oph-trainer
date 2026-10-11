@@ -1,6 +1,6 @@
-# Orpheus interview training
+# Unofficial Orpheus interview training
 
-Practice for the Orpheus admission interview through quizzes based on the official syllabus.
+An unofficial training app for the Orpheus admission interview, with quizzes based on the official syllabus.
 
 ## Language
 

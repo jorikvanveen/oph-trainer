@@ -71,7 +71,7 @@ async fn disable_caching(mut response: Response) -> Response {
 
 pub async fn sample() -> Json<SampleDto> {
     Json(SampleDto {
-        message: "Hello from Orpheus interview trainer".to_owned(),
+        message: "Hello from the unofficial Orpheus interview trainer".to_owned(),
     })
 }
 

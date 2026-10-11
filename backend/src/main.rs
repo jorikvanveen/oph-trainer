@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
         automatic_grading = config.openrouter_api_key.is_some(),
         use_x_forwarded_for = config.use_x_forwarded_for,
         static_dir = %config.static_dir,
-        "Starting Orpheus trainer"
+        "Starting unofficial Orpheus interview trainer"
     );
     if config.openrouter_api_key.is_none() {
         tracing::warn!(

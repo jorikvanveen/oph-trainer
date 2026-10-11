@@ -146,7 +146,13 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
   const created = await creation;
   expect(created.status()).toBe(200);
   const account: AccountDto = await created.json();
-  await expect(page).toHaveTitle('Orpheus interview trainer');
+  await expect(page).toHaveTitle('Unofficial Orpheus interview trainer');
+  await expect(
+    page.getByText(
+      'Unofficial training app for the Orpheus admission interview. Not affiliated with Orpheus.',
+      { exact: true }
+    )
+  ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Start quiz', exact: true })
   ).toBeEnabled();
@@ -267,7 +273,7 @@ test('automatic account, immediate feedback, correction, self-assessment, comple
     session: { ...sessionStorage }
   }));
   expect(storage).toEqual({
-    local: { 'orpheus.account-key': key },
+    local: { 'oph-trainer.account-key': key },
     session: {}
   });
 
@@ -791,7 +797,6 @@ for (const topic of [
     ).toBe(true);
     const outcomes: { question_id: string; correct: boolean }[] = [];
     let images = 0;
-    let logs = 0;
     let cues = 0;
     for (const question of quiz.questions) {
       await expect(
@@ -832,7 +837,6 @@ for (const topic of [
           await expect(diagram).toBeVisible();
           await page.setViewportSize({ width: 390, height: 844 });
         } else {
-          if (question.question_id === 'cd-log-reading') logs++;
           if (question.question_id === 'cd-cue-reading') cues++;
           const excerpt = page.getByLabel(material.description, {
             exact: true
@@ -877,10 +881,7 @@ for (const topic of [
       await next.click();
     }
     if (topic.id === 'spectral') expect(images).toBeGreaterThan(0);
-    else {
-      expect(logs).toBe(1);
-      expect(cues).toBe(1);
-    }
+    else expect(cues).toBe(1);
     await expect(page.getByRole('status')).toHaveText('Progress saved.');
     const saved = await loadProgress(page.request, key);
     expect(saved.history).toEqual([{ quiz_id: quiz.quiz_id, outcomes }]);

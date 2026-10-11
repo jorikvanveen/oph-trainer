@@ -8,7 +8,7 @@ import type { CommitQuizDto } from '#lib/dto/CommitQuizDto.ts';
 import type { ProgressDto } from '#lib/dto/ProgressDto.ts';
 import type { AccountDto } from '#lib/dto/AccountDto.ts';
 
-const keyStorage = 'orpheus.account-key';
+const keyStorage = 'oph-trainer.account-key';
 
 export class AppState {
   catalog = $state<QuestionCatalogDto | null>(null);
@@ -79,9 +79,16 @@ export class AppState {
     this.busy = true;
     this.error = '';
     try {
-      const request: QuizSelectionRequestDto = this.selected.length === this.catalog.topics.length
-        ? {} : { topic_ids: this.selected };
-      const batch = await api<QuizSelectionResponseDto>('/quizzes', this.accountKey, 'POST', request);
+      const request: QuizSelectionRequestDto =
+        this.selected.length === this.catalog.topics.length
+          ? {}
+          : { topic_ids: this.selected };
+      const batch = await api<QuizSelectionResponseDto>(
+        '/quizzes',
+        this.accountKey,
+        'POST',
+        request
+      );
       this.quiz = batch;
       this.outcomes = [];
       this.saved = false;
@@ -96,13 +103,21 @@ export class AppState {
   }
 
   async saveQuiz() {
-    if (this.busy || !this.quiz || this.saved || this.outcomes.length !== this.quiz.questions.length) return;
+    if (
+      this.busy ||
+      !this.quiz ||
+      this.saved ||
+      this.outcomes.length !== this.quiz.questions.length
+    )
+      return;
     this.busy = true;
     this.error = '';
     try {
       const completed: CommitQuizDto = {
         quiz_id: this.quiz.quiz_id,
-        question_ids: this.quiz.questions.map((question) => question.question_id),
+        question_ids: this.quiz.questions.map(
+          (question) => question.question_id
+        ),
         outcomes: this.outcomes
       };
       await api<void>('/progress/quizzes', this.accountKey, 'POST', completed);

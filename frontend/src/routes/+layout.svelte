@@ -2,7 +2,12 @@
   import Disc3 from '@lucide/svelte/icons/disc-3';
   import BookOpen from '@lucide/svelte/icons/book-open';
   import { onMount, type Snippet } from 'svelte';
-  import { afterNavigate, beforeNavigate, goto, type BeforeNavigate } from '$app/navigation';
+  import {
+    afterNavigate,
+    beforeNavigate,
+    goto,
+    type BeforeNavigate
+  } from '$app/navigation';
   import { page } from '$app/state';
   import { AppState, setAppState } from '#lib/app-state.svelte.ts';
   import Confirmation from '#lib/Confirmation.svelte';
@@ -13,7 +18,9 @@
   let pendingNavigation = $state<BeforeNavigate | null>(null);
   const quizPage = $derived(page.url.pathname.startsWith('/quiz/'));
 
-  onMount(() => { void appState.initialize(); });
+  onMount(() => {
+    void appState.initialize();
+  });
 
   beforeNavigate((navigation) => {
     if (navigation.type === 'leave') {
@@ -26,9 +33,11 @@
     }
     if (navigation.to?.url.pathname === navigation.from?.url.pathname) return;
     const fromQuiz = navigation.from?.route.id?.startsWith('/quiz');
-    const finishing = navigation.from?.route.id === '/quiz'
-      && navigation.to?.route.id === '/quiz/summary'
-      && appState.quiz && appState.outcomes.length === appState.quiz.questions.length;
+    const finishing =
+      navigation.from?.route.id === '/quiz' &&
+      navigation.to?.route.id === '/quiz/summary' &&
+      appState.quiz &&
+      appState.outcomes.length === appState.quiz.questions.length;
     if (fromQuiz && appState.unfinished && !finishing) {
       navigation.cancel();
       pendingNavigation = navigation;
@@ -60,64 +69,175 @@
   }
 </script>
 
-<svelte:head><title>Orpheus interview trainer</title></svelte:head>
-<svelte:window onpagehide={() => { if (appState.unfinished) appState.discard(); }} />
+<svelte:head>
+  <title>Unofficial Orpheus interview trainer</title>
+  <meta
+    name="description"
+    content="Unofficial training app for the Orpheus admission interview. Not affiliated with Orpheus."
+  />
+</svelte:head>
+<svelte:window
+  onpagehide={() => {
+    if (appState.unfinished) appState.discard();
+  }}
+/>
 
 <div class="app-shell">
   <header class="topbar">
     <div class="topbar-left">
-      <a class="brand control ghost" aria-label="Orpheus home" href="/" aria-disabled={appState.busy}>
-        <span class="brand-mark"><Disc3 size={23} strokeWidth={1.25} focusable="false" /></span><span>orpheus</span>
+      <a
+        class="brand control ghost"
+        aria-label="Interview trainer home"
+        href="/"
+        aria-disabled={appState.busy}
+      >
+        <span class="brand-mark">
+          <Disc3 size={23} strokeWidth={1.25} focusable="false" />
+        </span>
+        <span>interview trainer</span>
       </a>
-      <nav class="header-nav" aria-label="Main navigation" data-sveltekit-preload-code="eager">
-        <a class="nav-item control ghost" class:nav-active={page.url.pathname !== '/progress/'} aria-current={page.url.pathname !== '/progress/' ? 'page' : undefined} href="/" aria-disabled={appState.busy}>Practice</a>
-        <a class="nav-item control ghost" class:nav-active={page.url.pathname === '/progress/'} aria-current={page.url.pathname === '/progress/' ? 'page' : undefined} href="/progress/" aria-disabled={appState.busy}>Your progress</a>
+      <nav
+        class="header-nav"
+        aria-label="Main navigation"
+        data-sveltekit-preload-code="eager"
+      >
+        <a
+          class="nav-item control ghost"
+          class:nav-active={page.url.pathname !== '/progress/'}
+          aria-current={page.url.pathname !== '/progress/' ? 'page' : undefined}
+          href="/"
+          aria-disabled={appState.busy}
+        >
+          Practice
+        </a>
+        <a
+          class="nav-item control ghost"
+          class:nav-active={page.url.pathname === '/progress/'}
+          aria-current={page.url.pathname === '/progress/' ? 'page' : undefined}
+          href="/progress/"
+          aria-disabled={appState.busy}
+        >
+          Your progress
+        </a>
       </nav>
     </div>
     <div class="topbar-right">
-      <button class="ghost" disabled={appState.busy} aria-expanded={appState.accountOpen} onclick={() => { appState.accountOpen = !appState.accountOpen; appState.error = ''; }}>Account</button>
-      <a class="guide-link" href="https://interview.orpheus.network/" target="_blank" rel="noreferrer" aria-label="Official interview guide" title="Official interview guide"><BookOpen size={16} focusable="false" /></a>
+      <button
+        class="ghost"
+        disabled={appState.busy}
+        aria-expanded={appState.accountOpen}
+        onclick={() => {
+          appState.accountOpen = !appState.accountOpen;
+          appState.error = '';
+        }}
+      >
+        Account
+      </button>
+      <a
+        class="guide-link"
+        href="https://interview.orpheus.network/"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="Official interview guide"
+        title="Official interview guide"
+      >
+        <BookOpen size={16} focusable="false" />
+      </a>
     </div>
   </header>
 
-  <main class="main-content" class:quiz-main={quizPage} aria-busy={appState.busy}>
+  <main
+    class="main-content"
+    class:quiz-main={quizPage}
+    aria-busy={appState.busy}
+  >
     {#if appState.accountOpen}
       <section class="account-panel" aria-label="Account">
         {#if appState.accountKey}
           <label for="account-key">Your account key</label>
-          <input id="account-key" value={appState.accountKey} readonly spellcheck="false" />
-          <p>Save this key to access your progress on another device. Keep it private.</p>
+          <input
+            id="account-key"
+            value={appState.accountKey}
+            readonly
+            spellcheck="false"
+          />
+          <p>
+            Save this key to access your progress on another device. Keep it
+            private.
+          </p>
         {/if}
         <form onsubmit={switchAccount}>
           <label for="existing-key">Existing account key</label>
-          <input id="existing-key" bind:value={enteredKey} disabled={appState.busy} autocomplete="off" spellcheck="false" />
-          <button type="submit" disabled={appState.busy || !enteredKey.trim()}>Use account key</button>
-          {#if appState.unfinished}<p>Switching accounts discards this unfinished quiz.</p>{/if}
+          <input
+            id="existing-key"
+            bind:value={enteredKey}
+            disabled={appState.busy}
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <button type="submit" disabled={appState.busy || !enteredKey.trim()}>
+            Use account key
+          </button>
+          {#if appState.unfinished}<p>
+              Switching accounts discards this unfinished quiz.
+            </p>{/if}
         </form>
       </section>
     {/if}
     {#if appState.error}<p class="notice" role="alert">{appState.error}</p>{/if}
     {#if appState.progressError}
       <div class="notice">
-        <p role="alert">Progress could not be loaded. {appState.progressError}</p>
-        <button class="secondary" disabled={appState.busy} onclick={() => appState.refreshProgress()}>Retry loading progress</button>
+        <p role="alert">
+          Progress could not be loaded. {appState.progressError}
+        </p>
+        <button
+          class="secondary"
+          disabled={appState.busy}
+          onclick={() => appState.refreshProgress()}
+        >
+          Retry loading progress
+        </button>
       </div>
     {/if}
     {#if !appState.catalog}
-      <p role="status">{appState.busy ? 'Loading topics...' : 'Topics could not be loaded.'}</p>
-      {#if !appState.busy}<button onclick={() => appState.initialize()}>Retry loading topics</button>{/if}
+      <p role="status">
+        {appState.busy ? 'Loading topics...' : 'Topics could not be loaded.'}
+      </p>
+      {#if !appState.busy}<button onclick={() => appState.initialize()}>
+          Retry loading topics
+        </button>{/if}
     {/if}
     {@render children()}
   </main>
+
+  {#if !quizPage}
+    <footer class="app-footer">
+      <p>
+        Unofficial training app for the Orpheus admission interview. Not
+        affiliated with Orpheus.
+      </p>
+    </footer>
+  {/if}
 </div>
 
 {#if pendingNavigation}
-  <Confirmation title="Leave this quiz?" description="This quiz's unsaved results will be discarded. Completed quizzes won't change." confirm="Discard quiz" cancel="Keep practicing"
-    oncancel={() => { pendingNavigation = null; }} onconfirm={discardAndNavigate} />
+  <Confirmation
+    title="Leave this quiz?"
+    description="This quiz's unsaved results will be discarded. Completed quizzes won't change."
+    confirm="Discard quiz"
+    cancel="Keep practicing"
+    oncancel={() => {
+      pendingNavigation = null;
+    }}
+    onconfirm={discardAndNavigate}
+  />
 {/if}
 
 <style>
-  :global(svg.lucide) { flex-shrink: 0; display: block; }
+  :global(svg.lucide) {
+    flex-shrink: 0;
+    display: block;
+  }
 
   :global(:root) {
     font-family: 'Inter', 'Segoe UI', sans-serif;
@@ -136,11 +256,16 @@
     margin: 0;
   }
 
-  :global(button), :global(input), :global(textarea) {
+  :global(button),
+  :global(input),
+  :global(textarea) {
     font: inherit;
   }
 
-  :global(button), :global(a), :global(input), :global(textarea) {
+  :global(button),
+  :global(a),
+  :global(input),
+  :global(textarea) {
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -154,13 +279,16 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    :global(*), :global(*::before), :global(*::after) {
+    :global(*),
+    :global(*::before),
+    :global(*::after) {
       transition-duration: 0.01ms !important;
       scroll-behavior: auto !important;
     }
   }
 
-  button, a.control {
+  button,
+  a.control {
     border: 1px solid transparent;
     border-radius: 12px;
     background: #335c49;
@@ -176,11 +304,13 @@
     cursor: pointer;
   }
 
-  button:hover, a.control:hover {
+  button:hover,
+  a.control:hover {
     background: #284a3a;
   }
 
-  button:disabled, a.control[aria-disabled="true"] {
+  button:disabled,
+  a.control[aria-disabled='true'] {
     opacity: 0.5;
     cursor: default;
   }
@@ -191,12 +321,15 @@
     border-color: #d7dcd1;
   }
 
-  button.ghost, a.control.ghost {
+  button.ghost,
+  a.control.ghost {
     background: transparent;
     color: #56634d;
   }
 
-  button.ghost:hover, a.control.ghost:hover, button.secondary:hover {
+  button.ghost:hover,
+  a.control.ghost:hover,
+  button.secondary:hover {
     background: #edf1e9;
   }
 
@@ -223,7 +356,9 @@
     backdrop-filter: blur(12px);
   }
 
-  .topbar-left, .topbar-right, .header-nav {
+  .topbar-left,
+  .topbar-right,
+  .header-nav {
     display: flex;
     align-items: center;
   }
@@ -297,6 +432,18 @@
     padding: 32px 24px 48px;
     max-width: 1080px;
     margin: 0 auto;
+  }
+
+  .app-footer {
+    padding: 0 24px 40px;
+    max-width: 1080px;
+    margin: 0 auto;
+    color: #6c716a;
+    font-size: 12px;
+  }
+
+  .app-footer p {
+    margin: 0;
   }
 
   .notice {
@@ -388,7 +535,10 @@
       min-height: 32px;
     }
 
-    .guide-link { width: 30px; height: 32px; }
+    .guide-link {
+      width: 30px;
+      height: 32px;
+    }
 
     .brand > span:last-child {
       display: none;
@@ -414,6 +564,10 @@
       padding: 22px 16px 32px;
     }
 
+    .app-footer {
+      padding: 0 16px 28px;
+    }
+
     .account-panel input {
       font-size: 16px;
     }
@@ -425,5 +579,4 @@
     justify-content: center;
     text-decoration: none;
   }
-
 </style>
