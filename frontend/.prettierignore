@@ -1,0 +1,5 @@
+.svelte-kit/
+build/
+test-results/
+src/lib/dto/
+package-lock.json

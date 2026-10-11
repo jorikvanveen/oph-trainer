@@ -2,7 +2,15 @@
 
 Prefer the scripts in `scripts/` for common development tasks.
 
+The flake devshell is already loaded into the agent's environment. Run scripts and tool commands directly; do not wrap them in `nix develop`.
+
 Before running the app, checking or building changes, exporting DTOs, or managing migrations, read `scripts/README.md` for the available commands and usage.
+
+# Formatting
+
+After editing frontend files, format them with Prettier and `prettier-plugin-svelte`: `npm run format --prefix frontend -- <paths>`, with paths relative to `frontend/`. The formatter configuration excludes generated DTOs and build outputs.
+
+After editing Rust, run `cargo fmt --manifest-path backend/Cargo.toml --all` from the repository root.
 
 # Database access
 

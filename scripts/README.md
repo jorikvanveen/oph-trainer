@@ -4,6 +4,13 @@ Run these scripts in the flake devshell. They resolve paths relative to their ow
 
 Install frontend dependencies once with `npm ci --prefix frontend` from the repository root.
 
+Format frontend files with Prettier and its Svelte plugin. Pass paths relative to `frontend/`, or `.` for the whole frontend. Generated DTOs and build outputs are excluded:
+
+```sh
+npm run format --prefix frontend -- src/routes/quiz/+page.svelte
+npm run format:check --prefix frontend -- src/routes/quiz/+page.svelte
+```
+
 | Script | Task |
 | --- | --- |
 | `dev-backend.sh` | Run the backend with Cargo. Extra arguments go to `cargo run`. |
@@ -40,7 +47,7 @@ Install dependencies with `npm ci --prefix frontend`. Run tests in the flake dev
 
 ```sh
 ./scripts/test.sh
-./scripts/test.sh --grep 'sample API'
+./scripts/test.sh --grep 'automatic account'
 ```
 
 `npm run test:browser --prefix frontend` invokes the same runner. Do not start Vite or the backend yourself. Direct `playwright test` invocation rejects a missing runner configuration rather than connecting to a developer server.
@@ -63,11 +70,11 @@ The configuration adapts the prototype's Chromium selection without copying its 
 
 The runner preserves `PLAYWRIGHT_BROWSERS_PATH` and `XDG_CACHE_HOME` for Playwright's installed-browser lookup. Chromium itself uses temporary config and cache directories.
 
-Dependency and browser installation can require network access. After setup, the default smoke test requires no secrets, external assets, OpenRouter/TypeSafe access, or paid model calls. There is no live-provider smoke test. Chromium runs headless with Playwright's default launch settings; no persistent user browser profile is used.
+Dependency and browser installation can require network access. After setup, the default test suite requires no secrets, external assets, OpenRouter/TypeSafe access, or paid model calls. There is no live-provider smoke test. Chromium runs headless with Playwright's default launch settings; no persistent user browser profile is used.
 
 ### Adding feature tests
 
-Put production behavior tests in `frontend/tests/*.spec.ts`. The initial smoke test loads the static page, clicks its sample API button, and checks both the browser's same-origin HTTP response and the displayed result. It does not intercept or mock `/api`.
+Put production behavior tests in `frontend/tests/*.spec.ts`. The practice tests load the static page, start quizzes through the same-origin API, and exercise topic selection, immediate feedback, self-assessment, corrected grades, completed-only saving, account access across browser contexts, switching, reset, and keyboard use at mobile sizes. Network failure tests take the browser offline, then retry against the same server. They do not intercept or mock `/api`.
 
 Use Playwright's `page` fixture, accessible roles and labels, and observable HTTP responses. Drive quizzes, grading, and progress through the UI or public APIs, then verify feedback and persistence by reloading or opening a separate browser context. Do not import private application functions, assert component internals, or query particular SQLite tables. Tests share the run's fresh database and execute with one worker, so create independent account data or reset through public behavior when a feature needs server-side state isolation.
 
@@ -87,7 +94,9 @@ Both practice POST endpoints use Axum's standard JSON extractor and rejection re
 
 Edit the authored `QuestionDto` entries in [questions.rs](../backend/src/question_bank/questions.rs). Keep existing question IDs for the same questions, assign new IDs to different questions, and review content against the linked official syllabus pages. Author accepted answers and aliases explicitly; explanation criteria require the points the prompt asks for, with optional details and contradictions kept separate. Run `./scripts/test.sh` after edits. Tests check the bank's unique IDs, topic references, nonblank content, official source links, and grading criteria directly; startup performs no content validation.
 
-The [account decision](../docs/adr/0002-account-keys-as-sole-credentials.md) explains account keys. [Backend DTOs](../backend/src/dto.rs) define completed-quiz and progress contracts. Account keys authorize requests through the `Authorization: Bearer` header. Serve production traffic through HTTPS.
+The [account decision](../docs/adr/0002-account-keys-as-sole-credentials.md) explains account keys. [Backend DTOs](../backend/src/dto.rs) define completed-quiz and progress contracts. When the app opens without a retained key, it creates an account through `POST /api/accounts` before loading practice and progress. Account keys authorize requests through the `Authorization: Bearer` header. The frontend retains only the current account key in local storage. It keeps quiz questions, typed answers, and unsaved outcomes in memory, and reloads completed progress from the server. The Account panel offers the current key for saving and accepts an existing key; a switch takes effect only after the server loads that account's progress. Serve production traffic through HTTPS.
+
+The SvelteKit routes are `/` for topic selection, `/quiz/` for the active quiz, `/quiz/summary/` for its completion summary, and `/progress/` for saved metrics. The shared layout holds the account and in-memory batch across route changes. Opening or refreshing a quiz or summary URL without a batch returns to topic selection. Navigation away from an unfinished quiz requires confirmation, including browser Back; confirmed navigation discards the batch.
 
 ## Migrations
 
