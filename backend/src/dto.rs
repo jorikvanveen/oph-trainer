@@ -45,6 +45,16 @@ pub struct QuestionDto {
     pub reference_answer: String,
     pub source_url: String,
     pub grading: AnswerCriteria,
+    #[serde(default)]
+    pub material: Vec<ExerciseMaterialDto>,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]
+#[serde(tag = "type", rename_all = "snake_case", deny_unknown_fields)]
+#[ts(export)]
+pub enum ExerciseMaterialDto {
+    Image { src: String, description: String },
+    Excerpt { description: String, text: String },
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq, TS)]

@@ -4,6 +4,7 @@ use ts_rs::TS;
 use crate::dto::{QuestionDto, TopicDto};
 
 mod questions;
+mod syllabus;
 
 #[derive(Debug, Clone, Default)]
 pub struct QuestionBank {
@@ -13,7 +14,9 @@ pub struct QuestionBank {
 
 impl QuestionBank {
     pub fn questions() -> Self {
-        questions::bank()
+        let mut bank = questions::bank();
+        syllabus::extend(&mut bank);
+        bank
     }
 }
 

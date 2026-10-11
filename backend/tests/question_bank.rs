@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashSet};
 
 use oph_trainer_backend::{
-    dto::{AnswerSubmissionDto, FeedbackStatusDto, QuizSelectionRequestDto},
+    dto::{AnswerSubmissionDto, ExerciseMaterialDto, FeedbackStatusDto, QuizSelectionRequestDto},
     practice::PracticeService,
     question_bank::{AnswerCriteria, QuestionBank},
 };
@@ -11,14 +11,23 @@ use rand::{SeedableRng, rngs::StdRng};
 fn questions_support_ten_distinct_questions_and_smaller_topic_quizzes() {
     let practice = PracticeService::new(QuestionBank::questions());
     let catalog = practice.catalog();
-    assert_eq!(catalog.questions.len(), 12);
     assert_eq!(
         catalog
             .topics
             .iter()
             .map(|topic| topic.topic_id.as_str())
             .collect::<HashSet<_>>(),
-        HashSet::from(["formats", "mp3", "transcodes"])
+        HashSet::from([
+            "sources",
+            "formats",
+            "mp3",
+            "transcodes",
+            "torrenting",
+            "spectral",
+            "cd",
+            "dupes",
+            "rules"
+        ])
     );
 
     let mut rng = StdRng::seed_from_u64(5);
@@ -49,21 +58,25 @@ fn questions_support_ten_distinct_questions_and_smaller_topic_quizzes() {
                 &mut rng,
             )
             .unwrap();
-        assert_eq!(quiz.questions.len(), 4);
+        let pool_size = catalog
+            .questions
+            .iter()
+            .filter(|q| q.topic_id == topic.topic_id)
+            .count();
+        assert!(pool_size > 0, "{}: empty topic", topic.topic_id);
+        assert_eq!(quiz.questions.len(), 10.min(pool_size));
+        assert_eq!(
+            quiz.questions
+                .iter()
+                .map(|q| &q.question_id)
+                .collect::<HashSet<_>>()
+                .len(),
+            quiz.questions.len()
+        );
         assert!(
             quiz.questions
                 .iter()
                 .all(|question| question.topic_id == topic.topic_id)
-        );
-        assert!(
-            quiz.questions
-                .iter()
-                .any(|question| matches!(question.grading, AnswerCriteria::ShortAnswer { .. }))
-        );
-        assert!(
-            quiz.questions
-                .iter()
-                .any(|question| matches!(question.grading, AnswerCriteria::Explanation { .. }))
         );
     }
 }
@@ -237,4 +250,50 @@ fn questions_have_authored_grading_criteria() {
             }
         }
     }
+}
+
+#[test]
+fn exercise_material_is_readable_and_images_are_bundled() {
+    let mut image_count = 0;
+    let mut excerpt_count = 0;
+    let static_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("../frontend/static");
+    for question in QuestionBank::questions().questions {
+        for material in question.material {
+            match material {
+                ExerciseMaterialDto::Image { src, description } => {
+                    image_count += 1;
+                    assert!(
+                        !description.trim().is_empty(),
+                        "{}: missing image description",
+                        question.question_id
+                    );
+                    assert!(
+                        src.starts_with("/exercises/") && !src.contains(".."),
+                        "{}: image must be a local exercise asset",
+                        question.question_id
+                    );
+                    let bytes = std::fs::read(static_dir.join(src.trim_start_matches('/')))
+                        .unwrap_or_else(|error| {
+                            panic!("{}: missing asset {src}: {error}", question.question_id)
+                        });
+                    assert!(!bytes.is_empty(), "{}: empty image", question.question_id);
+                }
+                ExerciseMaterialDto::Excerpt { description, text } => {
+                    excerpt_count += 1;
+                    assert!(
+                        !description.trim().is_empty(),
+                        "{}: missing excerpt description",
+                        question.question_id
+                    );
+                    assert!(
+                        !text.trim().is_empty() && text.contains('\n'),
+                        "{}: excerpt must preserve its lines",
+                        question.question_id
+                    );
+                }
+            }
+        }
+    }
+    assert!(image_count > 0, "Spectral exercises are required");
+    assert!(excerpt_count > 0, "CD log/cue exercises are required");
 }

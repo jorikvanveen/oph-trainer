@@ -44,6 +44,7 @@ pub fn bank(size: usize) -> QuestionBank {
             .map(|index| QuestionDto {
                 question_id: format!("q{index}"),
                 topic_id: if index < 3 { "audio" } else { "transcodes" }.into(),
+                material: vec![],
                 prompt: format!("Question {index}"),
                 reference_answer: "Authored reference".into(),
                 source_url: "https://example.com/syllabus".into(),

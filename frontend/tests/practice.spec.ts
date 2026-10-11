@@ -756,3 +756,141 @@ test('routes support direct visits and browser history without restoring abandon
     page.getByText('No completed quizzes.', { exact: true })
   ).toBeVisible();
 });
+
+for (const topic of [
+  { id: 'spectral', name: 'Spectral analysis' },
+  { id: 'cd', name: 'CD burning and ripping' }
+]) {
+  test(`${topic.name} exercises render, require assessment and save completed progress`, async ({
+    page,
+    request,
+    baseURL
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const externalRequests: string[] = [];
+    page.on('request', (request) => {
+      if (new URL(request.url()).origin !== new URL(baseURL!).origin)
+        externalRequests.push(request.url());
+    });
+    const catalog = await loadCatalog(request);
+    await page.goto('/');
+    await selectTopics(page, [topic.name]);
+    const key = await keyFromUI(page);
+    const quiz = await start(page);
+    const pool = catalog.questions.filter(
+      (question) => question.topic_id === topic.id
+    );
+    expect(quiz.questions).toHaveLength(pool.length);
+    expect(new Set(quiz.questions.map((q) => q.question_id)).size).toBe(
+      pool.length
+    );
+    expect(
+      quiz.questions.every((question) => question.topic_id === topic.id)
+    ).toBe(true);
+    const outcomes: { question_id: string; correct: boolean }[] = [];
+    let images = 0;
+    let logs = 0;
+    let cues = 0;
+    for (const question of quiz.questions) {
+      await expect(
+        page.getByRole('heading', { name: question.prompt, exact: true })
+      ).toBeVisible();
+      await expect(
+        page.getByRole('heading', { name: 'Reference answer', exact: true })
+      ).toHaveCount(0);
+      for (const material of question.material) {
+        await expect(
+          page.locator('figcaption').filter({ hasText: material.description })
+        ).toBeVisible();
+        if (material.type === 'image') {
+          images++;
+          const diagram = page.getByRole('img', {
+            name: material.description,
+            exact: true
+          });
+          await expect(diagram).toBeVisible();
+          await expect(diagram).toHaveAttribute('src', material.src);
+          await expect
+            .poll(() =>
+              diagram.evaluate(
+                (img: HTMLImageElement) => img.complete && img.naturalWidth > 0
+              )
+            )
+            .toBe(true);
+          const fullSize = page.getByRole('link', {
+            name: 'Open full-size diagram'
+          });
+          await expect(fullSize).toHaveAttribute('href', material.src);
+          const asset = await request.get(material.src);
+          expect(asset.status()).toBe(200);
+          expect(asset.headers()['content-type']).toContain('image/');
+          await page.setViewportSize({ width: 1280, height: 900 });
+          await expect(diagram).toBeVisible();
+          await page.setViewportSize({ width: 390, height: 844 });
+        } else {
+          if (question.question_id === 'cd-log-reading') logs++;
+          if (question.question_id === 'cd-cue-reading') cues++;
+          const excerpt = page.getByLabel(material.description, {
+            exact: true
+          });
+          await expect(excerpt).toBeVisible();
+          expect(await excerpt.textContent()).toBe(material.text);
+          expect(
+            await excerpt.evaluate((node) => getComputedStyle(node).whiteSpace)
+          ).toBe('pre');
+          await excerpt.focus();
+          await expect(excerpt).toBeFocused();
+          await page.setViewportSize({ width: 1280, height: 900 });
+          await expect(excerpt).toBeVisible();
+          await page.setViewportSize({ width: 390, height: 844 });
+        }
+      }
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth
+        )
+      ).toBe(true);
+      const feedback = await submit(
+        page,
+        'My interpretation of the supplied material'
+      );
+      const next = page.getByRole('button', {
+        name: /^(Next question|Finish quiz)/
+      });
+      if (question.grading.type === 'explanation') {
+        expect(feedback.status).toBe('needs_self_assessment');
+        await expect(next).toBeDisabled();
+        await page
+          .getByRole('button', { name: 'I need more practice', exact: true })
+          .click();
+      } else expect(feedback.status).toBe('incorrect');
+      await page
+        .getByRole('button', { name: 'Mark my answer correct', exact: true })
+        .click();
+      await expect(page.getByText('Correct', { exact: true })).toBeVisible();
+      outcomes.push({ question_id: question.question_id, correct: true });
+      expect((await loadProgress(page.request, key)).history).toEqual([]);
+      await next.click();
+    }
+    if (topic.id === 'spectral') expect(images).toBeGreaterThan(0);
+    else {
+      expect(logs).toBe(1);
+      expect(cues).toBe(1);
+    }
+    await expect(page.getByRole('status')).toHaveText('Progress saved.');
+    const saved = await loadProgress(page.request, key);
+    expect(saved.history).toEqual([{ quiz_id: quiz.quiz_id, outcomes }]);
+    expect(saved.by_topic[topic.id].available_questions).toBe(pool.length);
+    expect(saved.by_topic[topic.id].covered_questions).toBe(pool.length);
+    expect(saved.by_topic[topic.id].correct_percentage).toBe(100);
+    await page.reload();
+    await page
+      .getByRole('link', { name: 'Your progress', exact: true })
+      .click();
+    await expect(
+      page.getByRole('group', { name: `${topic.name} progress`, exact: true })
+    ).toContainText(`${pool.length} completed answers`);
+    expect(await loadProgress(page.request, key)).toEqual(saved);
+    expect(externalRequests).toEqual([]);
+  });
+}

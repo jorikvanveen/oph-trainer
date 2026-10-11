@@ -158,6 +158,23 @@
       </span>
     </div>
     <h2>{current.prompt}</h2>
+    {#each current.material as material}
+      <figure class="exercise">
+        <figcaption>{material.description}</figcaption>
+        {#if material.type === 'image'}
+          <img src={material.src} alt={material.description} />
+          <a href={material.src} target="_blank" rel="noreferrer">
+            Open full-size diagram<ExternalLink size={14} focusable="false" />
+          </a>
+        {:else}
+          <!-- svelte-ignore a11y_no_noninteractive_tabindex (Keyboard focus lets readers scroll long excerpts horizontally.) -->
+          <pre
+            role="region"
+            tabindex="0"
+            aria-label={material.description}><code>{material.text}</code></pre>
+        {/if}
+      </figure>
+    {/each}
     <form onsubmit={submitAnswer}>
       <label class="answer-label" for="answer">Your answer</label>
       {#if current.grading.type === 'explanation'}
@@ -495,6 +512,49 @@
     font-size: 12px;
     font-weight: 500;
     margin: 25px 0 10px;
+  }
+
+  .exercise {
+    margin: 24px 0 0;
+    min-width: 0;
+  }
+
+  .exercise figcaption {
+    color: #626d59;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  .exercise img {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .exercise a {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 10px;
+    font-size: 13px;
+  }
+
+  .exercise pre {
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 16px;
+    border: 1px solid #d7dcd1;
+    border-radius: 8px;
+    background: #fcfcf9;
+    font-size: 13px;
+    line-height: 1.7;
+    white-space: pre;
+  }
+
+  .exercise pre:focus-visible {
+    outline: 2px solid #335c49;
+    outline-offset: 3px;
   }
 
   textarea {
