@@ -15,7 +15,9 @@ pub struct QuestionBank {
 impl QuestionBank {
     pub fn questions() -> Self {
         let mut bank = questions::bank();
-        syllabus::extend(&mut bank);
+        let syllabus = syllabus::bank();
+        bank.topics.extend(syllabus.topics);
+        bank.questions.extend(syllabus.questions);
         bank
     }
 }
