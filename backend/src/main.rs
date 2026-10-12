@@ -1,6 +1,11 @@
 use std::net::SocketAddr;
 
-use axum::Router;
+use axum::{
+    Router,
+    http::{HeaderValue, header},
+    middleware::map_response,
+    response::Response,
+};
 use migration::{Migrator, MigratorTrait};
 use oph_trainer_backend::{
     accounts::AccountService, config::Config, grading::GradingService, practice::PracticeService,
@@ -58,7 +63,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     // A service mount reserves both "/api" and "/api/" from the static fallback.
     let app = Router::new()
         .nest_service("/api", api)
-        .fallback_service(ServeDir::new(config.static_dir));
+        .fallback_service(ServeDir::new(config.static_dir))
+        .layer(map_response(deny_framing));
     let listener = TcpListener::bind(&config.bind_address).await?;
     tracing::info!(address = %listener.local_addr()?, "Listening");
     axum::serve(
@@ -67,4 +73,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     )
     .await?;
     Ok(())
+}
+
+async fn deny_framing(mut response: Response) -> Response {
+    let headers = response.headers_mut();
+    headers.insert(
+        header::CONTENT_SECURITY_POLICY,
+        HeaderValue::from_static("frame-ancestors 'none'"),
+    );
+    headers.insert(header::X_FRAME_OPTIONS, HeaderValue::from_static("DENY"));
+    response
 }
