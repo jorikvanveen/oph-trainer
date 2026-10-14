@@ -15,6 +15,7 @@ use crate::{
 
 const ENDPOINT: &str = "https://openrouter.ai/api/alpha/decisions";
 const MODEL: &str = "typesafe/jev-1.13";
+const MIN_CONFIDENCE: f64 = 0.8;
 const TIMEOUT: Duration = Duration::from_secs(8);
 pub const REQUEST_BYTES: usize = 16_384;
 pub const ANSWER_CHARS: usize = 4_000;
@@ -192,20 +193,27 @@ impl GradingService {
                 return Err("provider_invalid_decisions");
             }
             let choice = |id: &str| {
-                let decision = answers.get(id)?;
+                let decision = answers.get(id).ok_or("provider_invalid_decisions")?;
                 if decision["type"] != "choice" {
-                    return None;
+                    return Err("provider_invalid_decisions");
                 }
-                decision["choice"].as_str()
+                let confidence = decision["confidence"]
+                    .as_f64()
+                    .filter(|confidence| (0.0..=1.0).contains(confidence))
+                    .ok_or("provider_invalid_decisions")?;
+                if confidence < MIN_CONFIDENCE {
+                    return Err("provider_low_confidence");
+                }
+                decision["choice"]
+                    .as_str()
+                    .ok_or("provider_invalid_decisions")
             };
             let mut assessment = ExplanationFeedbackDto {
                 required_points: Vec::new(),
                 contradictions: Vec::new(),
             };
             for (index, point) in required_points.iter().enumerate() {
-                let covered = match choice(&format!("required_{index}"))
-                    .ok_or("provider_invalid_decisions")?
-                {
+                let covered = match choice(&format!("required_{index}"))? {
                     "covered" => true,
                     "missing" => false,
                     _ => return Err("provider_invalid_decisions"),
@@ -216,9 +224,7 @@ impl GradingService {
                 });
             }
             for (index, contradiction) in contradictions.iter().enumerate() {
-                match choice(&format!("contradiction_{index}"))
-                    .ok_or("provider_invalid_decisions")?
-                {
+                match choice(&format!("contradiction_{index}"))? {
                     "not_asserted" => {}
                     "asserted" => assessment.contradictions.push(contradiction.clone()),
                     _ => return Err("provider_invalid_decisions"),

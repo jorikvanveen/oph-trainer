@@ -89,6 +89,31 @@ async fn decisions(
                 json!({"type": "choice", "choice": "covered"}),
             );
         }
+        "low required confidence" => {
+            decisions.get_mut("required_1").unwrap()["confidence"] = json!(0.799);
+        }
+        "low contradiction confidence" => {
+            decisions.get_mut("contradiction_1").unwrap()["confidence"] = json!(0.799);
+        }
+        "high confidence" => {
+            for decision in decisions.values_mut() {
+                decision["confidence"] = json!(0.95);
+            }
+        }
+        "missing confidence" => {
+            decisions
+                .get_mut("required_1")
+                .unwrap()
+                .as_object_mut()
+                .unwrap()
+                .remove("confidence");
+        }
+        "invalid confidence" => {
+            decisions.get_mut("contradiction_1").unwrap()["confidence"] = json!("0.9");
+        }
+        "out of range confidence" => {
+            decisions.get_mut("required_1").unwrap()["confidence"] = json!(1.1);
+        }
         "malformed" => return "not json".into_response(),
         "timeout" => tokio::time::sleep(Duration::from_secs(9)).await,
         "oversized response" => return "x".repeat(70_000).into_response(),
@@ -260,6 +285,29 @@ async fn provider_failures_and_missing_credentials_leave_answers_ungraded() {
         answer(&unavailable, "good", "192.0.2.1:1234", None).await,
         "needs_self_assessment"
     );
+}
+
+#[tokio::test]
+async fn every_decision_needs_at_least_point_eight_confidence_to_grade() {
+    let provider = Provider::new().await;
+    let app = app(provider.service(), false).await;
+    for (text, expected) in [
+        ("good", "correct"),
+        ("incorrect", "incorrect"),
+        ("contradiction", "incorrect"),
+        ("high confidence", "correct"),
+        ("low required confidence", "needs_self_assessment"),
+        ("low contradiction confidence", "needs_self_assessment"),
+        ("missing confidence", "needs_self_assessment"),
+        ("invalid confidence", "needs_self_assessment"),
+        ("out of range confidence", "needs_self_assessment"),
+    ] {
+        assert_eq!(
+            answer(&app, text, "192.0.2.1:1234", None).await,
+            expected,
+            "{text}"
+        );
+    }
 }
 
 #[tokio::test]
