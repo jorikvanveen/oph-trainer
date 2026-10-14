@@ -784,17 +784,16 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "dupes-320-v0-coexist".into(),
                 topic_id: "dupes".into(),
-                prompt: "Can MP3 320 CBR and V0 coexist for the same edition on Orpheus?".into(),
+                prompt: "Can MP3 320 CBR and V0 coexist for the same edition on Orpheus? What restriction applies to uploading either encoding?".into(),
                 reference_answer: "Yes. If MP3 320 CBR already exists for an edition, you may upload V0 as long as an equivalent V0 torrent does not already exist. Likewise, an existing V0 torrent does not block a 320 CBR upload if an equivalent 320 CBR torrent is absent. Neither encoding trumps the other.".into(),
                 source_url: DUPES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "MP3 320 CBR and V0 may coexist for the same edition. Accept an explanation that an existing 320 CBR torrent still allows a V0 upload, or vice versa; the learner need not state both directions.".into(),
+                        "Yes, MP3 320 CBR and V0 may coexist for the same edition.".into(),
+                        "A new upload must not duplicate an existing rip in the same bitrate and format.".into(),
                     ],
-                    optional_points: vec![
-                        "The encoding being uploaded must not already have an equivalent torrent: V0 must be absent to add V0, and 320 CBR must be absent to add 320 CBR.".into(),
-                    ],
+                    optional_points: vec![],
                     contradictions: vec![
                         "V0 always trumps 320 CBR.".into(),
                         "320 CBR always trumps V0.".into(),
@@ -1077,13 +1076,10 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "spectral-piano-transcode".into(),
                 topic_id: "spectral".into(),
-                prompt: "This piano recording was converted from MP3 to FLAC. Does that recover discarded audio data? Explain.".into(),
+                prompt: "A piano recording was converted from MP3 to FLAC. Does that recover discarded audio data? Explain.".into(),
                 reference_answer: "No. MP3 encoding discarded audio data that conversion to FLAC cannot recover.".into(),
                 source_url: SPECTRALS.into(),
-                material: vec![ExerciseMaterialDto::Image {
-                    src: "/exercises/spectrum-l.png".into(),
-                    description: "Spectral diagram L of the supplied piano excerpt after the stated conversion, with time and frequency axes.".into(),
-                }],
+                material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
                         "Converting MP3 to FLAC cannot recover audio data discarded by the MP3 encode.".into(),
@@ -1452,14 +1448,14 @@ pub(super) fn bank() -> QuestionBank {
             QuestionDto {
                 question_id: "rules-ratio".into(),
                 topic_id: "rules".into(),
-                prompt: "Why are buffer transfers through unintended site features and false tracker reports prohibited?".into(),
-                reference_answer: "Unintended buffer transfer or inflation is ratio manipulation. False tracker reports are cheating, even with an approved client. Ask staff if unsure.".into(),
+                prompt: "What counts as ratio manipulation, and what counts as cheating in reports to Orpheus's tracker?".into(),
+                reference_answer: "Transferring or increasing buffer through unintended uses of the BitTorrent protocol or site features is ratio manipulation. Reporting incorrect data to the tracker is cheating, even with an approved client. Ask staff if unsure.".into(),
                 source_url: RULES.into(),
                 material: vec![],
                 grading: AnswerCriteria::Explanation {
                     required_points: vec![
-                        "Unintended buffer transfer/increase is ratio manipulation.".into(),
-                        "Reporting false data is cheating.".into(),
+                        "Ratio manipulation includes transferring or increasing buffer through unintended uses of the BitTorrent protocol or site features.".into(),
+                        "Tracker cheating means reporting incorrect data to the tracker.".into(),
                     ],
                     optional_points: vec![
                         "The prohibition applies even with an approved client.".into(),
