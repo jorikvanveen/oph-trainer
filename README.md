@@ -1,5 +1,12 @@
 # Orpheus interview trainer
 
+> [!IMPORTANT]
+> The question bank is now frozen. I created the entire existing question bank before ever participating in an Orpheus interview. I have since taken and passed the interview, so I will no longer maintain the question bank to avoid any perception that I am sharing interview questions.
+>
+> I also cannot accept question bank contributions, as I cannot verify whether a contributor has ever participated in an Orpheus interview. You are free to clone this repository and host your own question bank.
+>
+> I will continue maintaining the app and making functional improvements.
+
 [oph-trainer.jorik-dev.com](https://oph-trainer.jorik-dev.com/)
 
 An unofficial practice app for the [Orpheus admission interview](https://interview.orpheus.network/). Study the official syllabus with short quizzes, answer feedback, and saved progress. Not affiliated with Orpheus.
@@ -69,5 +76,3 @@ The test runner builds the production app, runs Rust tests, and tests the UI aga
 - [Project terminology](CONTEXT.md)
 - [Architecture decisions](docs/adr/)
 - [Question bank](backend/src/question_bank/)
-
-When editing questions, check their reference answers and grading criteria against the linked official syllabus pages.
